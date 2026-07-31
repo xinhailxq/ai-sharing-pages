@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "case_id": "issue-15-moonlit-cliff",
+  "title": "月夜悬崖竖图 · Veo 图生视频实验",
+  "summary": "以完整竖向人物构图为参考，生成一个 9:16、4 秒的月夜悬崖动态片段，重点评估人物身份稳定、轻微动作、镜头克制度和比例适配。",
+  "visibility": "public",
+  "publish_state": "published",
+  "generation_type": "image_to_video",
+  "technical_status": "passed",
+  "review_status": "partial",
+  "media": {
+    "reference": {
+      "src": "../../../assets/media-lab/issue-15/reference-preview.webp",
+      "alt": "月夜悬崖上的蓝衣幻想女性参考图",
+      "width": 768,
+      "height": 1152,
+      "aspect_ratio": "2:3",
+      "format": "webp"
+    },
+    "video": {
+      "src": "../../../assets/media-lab/issue-15/video-preview.mp4",
+      "poster": "../../../assets/media-lab/issue-15/video-poster.webp",
+      "width": 540,
+      "height": 960,
+      "aspect_ratio": "9:16",
+      "duration_seconds": 4,
+      "frame_rate_fps": 24,
+      "codec": "h264",
+      "audio": false
+    }
+  },
+  "prompt": {
+    "positive": "A restrained cinematic slow push-in toward the adult fantasy woman seated on the moonlit cliff. Her raised fingers extend only slightly and naturally toward the moon. A very gentle night breeze moves a few strands of her long black hair, the translucent sleeves, and the outer layers of her pale blue dress. The full moon and cold blue lighting remain stable while the tiny distant orange embers in the mountain valley flicker subtly. Preserve the exact face, eyes, hairstyle, silver-blue hair ornaments, earrings, dress design, body proportions, seated pose, hand anatomy, rocky foreground, moon position, composition, and blue nighttime atmosphere of the first frame. Keep motion elegant and minimal. No additional people, no text, no logos, no scene transition, and no abrupt camera movement.",
+    "negative": "identity drift, different face, facial distortion, altered hairstyle, changed hair ornaments, changed clothing, body deformation, extra fingers, fused fingers, extra limbs, additional people, duplicated person, text, subtitles, logos, bright daylight, scene change, fast camera movement, sudden zoom, large body motion, exaggerated wind",
+    "enhance_note": "页面展示的是提交给生成 API 的原始 Prompt。enhancePrompt=true，但模型内部增强后的完整文本不可获得。"
+  },
+  "parameters": {
+    "model": "veo-3.1-fast-generate-001",
+    "location": "us-central1",
+    "duration_seconds": 4,
+    "resolution": "720p",
+    "aspect_ratio": "9:16",
+    "resize_mode": "pad",
+    "enhance_prompt": true,
+    "generate_audio": false,
+    "person_generation": "allow_adult",
+    "sample_count": 1,
+    "seed": null,
+    "maximum_generation_attempts": 1,
+    "automatic_generation_retry": false,
+    "concurrent_generation": false
+  },
+  "ratio_decision": {
+    "input": "1024 × 1536（2:3，竖图）",
+    "target": "9:16",
+    "actual": "720 × 1280（9:16）",
+    "reason": "9:16 与参考图方向一致，优先保留人物、月亮和悬崖之间的完整竖向构图。",
+    "risk": "2:3 与 9:16 接近但不完全一致，pad 可能带来少量边缘补偿；直接改为 16:9 则会产生大量左右补边或严重裁切。"
+  },
+  "evaluation": {
+    "status": "partial",
+    "items": [
+      {
+        "label": "参考图遵守",
+        "status": "良好",
+        "note": "人物、服装、月亮与总体构图保持良好。"
+      },
+      {
+        "label": "人物身份稳定",
+        "status": "通过",
+        "note": "抽帧检查未观察到明显身份漂移或角色崩坏。"
+      },
+      {
+        "label": "动作克制度",
+        "status": "部分符合",
+        "note": "整体运动平稳，但抽帧可见手臂抬升幅度比 Prompt 中的“slightly”更明显。"
+      },
+      {
+        "label": "总体质量",
+        "status": "良好",
+        "note": "画面质量、冷蓝夜景和角色稳定性总体良好；手部细节与完整镜头运动仍标记为待逐帧复核。"
+      }
+    ]
+  },
+  "publication": {
+    "source_note": "本页展示经授权公开的 AI 生成实验预览。媒体为发布专用压缩副本，不包含私有 Drive 链接或内部审计材料。",
+    "reuse_note": "仅用于本案例公开展示；未声明第三方再利用许可。"
+  }
+}
