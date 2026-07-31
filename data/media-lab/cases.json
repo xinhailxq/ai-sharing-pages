@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "case_id": "issue-15-moonlit-cliff",
+      "title": "月夜悬崖竖图 · Veo 图生视频实验",
+      "summary": "以 2:3 竖向人物参考图生成 9:16、4 秒的克制电影感动态片段。",
+      "generation_type": "image_to_video",
+      "model": "veo-3.1-fast-generate-001",
+      "aspect_ratio": "9:16",
+      "duration_seconds": 4,
+      "technical_status": "passed",
+      "review_status": "partial",
+      "href": "./cases/issue-15/",
+      "poster": "../assets/media-lab/issue-15/video-poster.webp"
+    }
+  ]
+}
