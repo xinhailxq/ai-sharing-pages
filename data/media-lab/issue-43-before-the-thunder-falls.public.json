@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "case_id": "issue-43-before-the-thunder-falls",
+  "title": "雷落之前 · 仙侠情绪动作图生视频实验",
+  "summary": "以风暴擂台关键帧为输入，测试 Veo 在四秒竖屏镜头中保持人物、长剑、风雨与前后景空间关系，并尝试通过极小的视线与手腕变化表达一次克制的决定。",
+  "visibility": "public",
+  "publish_state": "published",
+  "generation_type": "image_to_video",
+  "technical_status": "passed",
+  "review_status": "partial",
+  "media": {
+    "reference": {
+      "src": "../../../assets/media-lab/issue-43-before-the-thunder-falls/reference-preview.webp",
+      "alt": "风暴擂台上，一名白蓝衣年轻女剑修在前景举剑引雷，远处一名受伤弟子仍站在石台上",
+      "width": 768,
+      "height": 1364,
+      "aspect_ratio": "941:1672",
+      "format": "webp"
+    },
+    "video": {
+      "src": "../../../assets/media-lab/issue-43-before-the-thunder-falls/video-preview.mp4",
+      "poster": "../../../assets/media-lab/issue-43-before-the-thunder-falls/video-poster.webp",
+      "width": 540,
+      "height": 960,
+      "aspect_ratio": "9:16",
+      "duration_seconds": 4.0,
+      "frame_rate_fps": 24.0,
+      "codec": "h264",
+      "audio": false
+    }
+  },
+  "prompt": {
+    "positive": "Use the provided first-frame reference as the identity, costume, composition, and starting-pose anchor.\n\nCreate one continuous four-second vertical cinematic shot. Preserve the same young Chinese immortal swordswoman from the first frame: a cold and elegant young face, long straight black hair, a refined silver-blue crown-like hair ornament, a small pale mark on her forehead, restrained white and pale-blue layered cultivation robes, and the same slender ornate blue-white sword.\n\nShe is the dominant foreground subject on a vast rain-darkened ancient sect martial arena high above a sea of clouds. Keep her slightly right of center, holding the sword raised toward heavy thunderclouds. The wet stone platform reflects the storm. Her hair, sleeves, and layered robes move backward in one consistent wind direction. Natural blue-white lightning gathers around the sword, but the final strike has not happened at the beginning.\n\nHer expression is proud, disciplined, severe, calm, and almost unreadable. She remains physically stable and completely in control.\n\nIn the distant left background, a wounded young male disciple in darker robes is visibly weaker, exhausted, and unsteady, but he refuses to retreat and forces himself upright. He remains secondary, smaller, and less visually prominent than the swordswoman throughout the shot.\n\nFirst, maintain the raised-sword storm-summoning pose while the wind and lightning intensify slightly. A flash briefly reveals the wounded disciple still standing. Without turning her head, the swordswoman notices him. Her eye focus shifts almost imperceptibly and her breathing pauses once.\n\nHer fingers then tighten around the sword hilt. Her wrist deliberately turns by only a few degrees, producing a small but readable change in sword direction. The gathered lightning follows the changed sword direction.\n\nThe lightning narrowly passes beside the wounded disciple and strikes the wet stone platform behind him. The impact cracks a small area of stone and throws a controlled amount of rain mist, water spray, and small fragments into the air. The changed strike must clearly appear intentionally redirected by her wrist movement, never like a random or accidental miss.\n\nAfter the strike, she does not smile, cry, or openly watch him. Her expression quickly returns to complete restraint.\n\nCamera: one slow controlled cinematic push-in, no cuts, no orbiting, no rapid zoom, and only one subtle physical shake at the lightning impact. Keep the face, hands, sword shape, costume identity, wind direction, and foreground-background relationship stable.\n\nPerformance tone: a powerful young woman experiencing one private instant of hesitation beneath absolute self-control. Not overt romance, not softness, not obvious mercy.\n\nGrounded Chinese xianxia cinematic realism, restrained mythic spectacle, realistic storm physics, readable action causality, cool blue-gray color palette, no dialogue, no subtitles, no visible text.",
+    "negative": "smiling, crying, tears, wet eyes, blushing, shy expression, romantic stare, obvious love, overt affection, melodramatic mercy, obvious surrender, emotional breakdown, weak heroine, frightened heroine, soft idol-drama heroine, seductive pose, exposed shoulders, revealing costume, bridal dress, overly ornate wedding styling, warm romantic lighting, pink lighting, anime style, cartoon style, game character design, game user interface, video game skill showcase, superhero pose, glowing eyes, neon purple lightning, magical circles, excessive particles, multiple lightning attacks, multiple sword attacks, running, jumping, spinning, body rotation, close-range duel, additional combat choreography, exaggerated sword swing, giant explosion, building destruction, chaotic camera orbit, rapid cuts, aggressive camera shake, random strike direction, unexplained miss, lightning directly hitting the male character, lightning covering the woman's face, male character becoming the hero or main focus, male close-up, male charging forward, crowded arena, duplicated people, extra limbs, extra fingers, malformed hands, broken wrist, changing sword shape, oversized sword, multiple swords, disappearing sword, floating weapon, facial identity drift, changing age, changing hairstyle, changing crown, changing costume, inconsistent wind direction, subtitles, text, logos, watermark",
+    "enhance_note": "页面展示的是提交给生成 API 的原始 Prompt。enhancePrompt=true，但模型内部增强后的完整文本不可获得。"
+  },
+  "parameters": {
+    "model": "veo-3.1-fast-generate-001",
+    "location": "us-central1",
+    "duration_seconds": 4,
+    "resolution": "720p",
+    "aspect_ratio": "9:16",
+    "resize_mode": "pad",
+    "enhance_prompt": true,
+    "generate_audio": false,
+    "person_generation": "allow_adult",
+    "sample_count": 1,
+    "seed": null,
+    "maximum_generation_attempts": 1,
+    "automatic_generation_retry": false,
+    "concurrent_generation": false
+  },
+  "ratio_decision": {
+    "input": "941 × 1672（接近 9:16，竖图）",
+    "target": "9:16 / 720p",
+    "actual": "720 × 1280（9:16）",
+    "reason": "目标比例与输入方向一致，并且是支持比例中最接近原始构图的选择，可保留前景女剑修、举剑方向和远景受伤弟子的空间关系。",
+    "risk": "几何预处理估计只需约 0.1% 的上下补边；实际视频已核验为 720 × 1280。公开预览将另行压缩并去除元数据，不提交原始 PNG 或原始 MP4。"
+  },
+  "evaluation": {
+    "status": "partial",
+    "items": [
+      {
+        "label": "人工观看结论",
+        "status": "接受公开",
+        "note": "用户已完整查看生成视频，并明确同意本案例进入公共页面流程。"
+      },
+      {
+        "label": "技术完整性",
+        "status": "通过",
+        "note": "实际输出为 720 × 1280、4.0 秒、24 fps、H.264、无音频；一次生成提交成功完成。"
+      },
+      {
+        "label": "创作逐项评分",
+        "status": "未单独公开评分",
+        "note": "本次公开只记录已完成观看与接受发布，不推断用户未提供的逐项画面评分。"
+      }
+    ]
+  },
+  "publication": {
+    "source_note": "本页面使用私有生成结果制作的发布专用压缩副本，仅公开参考图预览、视频预览、完整 Prompt、非敏感参数、比例说明、已核验技术事实与有限人工评审结论；不包含私有 Drive 链接、授权记录、内部运行标识、内部任务路径或日志。",
+    "reuse_note": "这是非官方 AI 同人创作与工作流实验。角色名称及相关世界观权利归原权利人；本站不声明拥有原作角色权利，也不授予商业再利用许可。公开媒体仅用于创作与生成流程展示。"
+  }
+}
