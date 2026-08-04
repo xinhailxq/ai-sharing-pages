@@ -13,6 +13,19 @@
       "review_status": "partial",
       "href": "./cases/issue-15/",
       "poster": "../assets/media-lab/issue-15/video-poster.webp"
+    },
+    {
+      "case_id": "issue-43-before-the-thunder-falls",
+      "title": "雷落之前 · 仙侠情绪动作图生视频实验",
+      "summary": "四秒竖屏仙侠图生视频实验：在风暴、雷法和双人物空间中测试角色稳定、动作因果与克制情绪表达。",
+      "generation_type": "image_to_video",
+      "model": "veo-3.1-fast-generate-001",
+      "aspect_ratio": "9:16",
+      "duration_seconds": 4,
+      "technical_status": "passed",
+      "review_status": "accepted",
+      "href": "./cases/issue-43-before-the-thunder-falls/",
+      "poster": "../assets/media-lab/issue-43-before-the-thunder-falls/video-poster.webp"
     }
   ]
 }
