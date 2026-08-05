@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "case_id": "issue-64-seated-dance",
+  "title": "坐姿轻舞 · 近景人物图生视频实验",
+  "summary": "以一张室内近景人像为首帧，测试 Veo 在八秒竖屏镜头中保持面部、无框眼镜、黑色长发、服装和暖色室内光线，同时生成连贯、克制的坐姿上半身舞动。",
+  "visibility": "public",
+  "publish_state": "published",
+  "generation_type": "image_to_video",
+  "technical_status": "passed",
+  "review_status": "partial",
+  "media": {
+    "reference": {
+      "src": "../../../assets/media-lab/issue-64-seated-dance/reference-preview.webp",
+      "alt": "暖色室内光线下，一名戴无框眼镜、留黑色长发并穿黑色上衣的成年女性近景人像",
+      "width": 768,
+      "height": 960,
+      "aspect_ratio": "561:701",
+      "format": "webp"
+    },
+    "video": {
+      "src": "../../../assets/media-lab/issue-64-seated-dance/video-preview.mp4",
+      "poster": "../../../assets/media-lab/issue-64-seated-dance/video-poster.webp",
+      "width": 540,
+      "height": 960,
+      "aspect_ratio": "9:16",
+      "duration_seconds": 8.0,
+      "frame_rate_fps": 24.0,
+      "codec": "h264",
+      "audio": false
+    }
+  },
+  "prompt": {
+    "positive": "A locked vertical medium close-up of the adult woman seated indoors. She performs a smooth, elegant seated dance with gentle rhythmic shoulder movements, subtle upper-body swaying, small natural head turns, and soft hair movement. Her expression remains relaxed and confident. Preserve her exact facial identity, rimless glasses, hairstyle, black ribbed outfit, body proportions, skin tone, and the original warm indoor lighting. Movement is graceful, continuous, physically coherent, and suitable for the close portrait framing. No camera movement, no zoom, and no scene cut.",
+    "negative": "identity change, face distortion, glasses deformation, warped body, chest distortion, extra limbs, extra fingers, duplicated arms, unnatural motion, exaggerated bouncing, outfit change, camera shake, zoom, cuts, scene change, text, subtitles, watermark, logo",
+    "enhance_note": "页面展示的是提交给生成 API 的原始 Prompt。enhancePrompt=true，但模型内部增强后的完整文本不可获得。"
+  },
+  "parameters": {
+    "model": "veo-3.1-fast-generate-001",
+    "location": "us-central1",
+    "duration_seconds": 8,
+    "resolution": "720p",
+    "aspect_ratio": "9:16",
+    "resize_mode": "pad",
+    "enhance_prompt": true,
+    "generate_audio": false,
+    "person_generation": "allow_adult",
+    "sample_count": 1,
+    "seed": null,
+    "maximum_generation_attempts": 1,
+    "automatic_generation_retry": false,
+    "concurrent_generation": false
+  },
+  "ratio_decision": {
+    "input": "1122 × 1402（561:701，竖图）",
+    "target": "9:16 / 720p",
+    "actual": "720 × 1280（9:16）",
+    "reason": "目标比例与输入方向一致，并且是支持比例中最接近原始构图的选择。实际输出已核验为 720 × 1280，可保留近景面部、眼镜、头发和上半身动作。",
+    "risk": "几何预处理估计可能沿上下方向补边约 29.7%；这是预处理估计，不代表最终视频出现可见黑边。公开预览将另行压缩并去除元数据，不提交原始 PNG 或原始 MP4。"
+  },
+  "evaluation": {
+    "status": "partial",
+    "items": [
+      {
+        "label": "人工发布结论",
+        "status": "接受进入公开候选流程",
+        "note": "用户确认视频已生成，并明确要求为 Issue #64 准备公共发布；最终公共写入仍需在候选文件、哈希和脱敏结果展示后逐案例确认。"
+      },
+      {
+        "label": "技术完整性",
+        "status": "通过",
+        "note": "实际输出为 720 × 1280、8.0 秒、24 fps、H.264、无音频；一次生成提交成功完成，MP4 SHA-256 为 77f1df6cd5cef457349adb0831010ff53cd4b243659dbb9c880474959d804efb。"
+      },
+      {
+        "label": "创作逐项评分",
+        "status": "未单独公开评分",
+        "note": "本次候选不推断用户未提供的身份稳定、动作自然度或画面质量逐项评分。"
+      }
+    ]
+  },
+  "publication": {
+    "source_note": "本页面使用私有生成结果制作发布专用压缩副本，仅拟公开参考图预览、视频预览、完整 Prompt、非敏感参数、比例说明、已核验技术事实与有限人工评审结论；不包含私有 Drive ID/URL、授权 ID 或回执、内部 operation、私有邮箱、内部任务路径或日志。",
+    "reuse_note": "本页面展示 AI 生成工作流实验。参考图与生成视频仅按本案例的明确授权用于公开展示；不授予第三方商业使用、再分发或人物肖像再利用许可。"
+  }
+}

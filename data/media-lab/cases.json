@@ -26,6 +26,19 @@
       "review_status": "partial",
       "href": "./cases/issue-43-before-the-thunder-falls/",
       "poster": "../assets/media-lab/issue-43-before-the-thunder-falls/video-poster.webp"
+    },
+    {
+      "case_id": "issue-64-seated-dance",
+      "title": "坐姿轻舞 · 近景人物图生视频实验",
+      "summary": "八秒竖屏近景图生视频实验：测试人物身份、眼镜、头发和服装稳定性，以及肩部、上身和头部的连续轻舞动作。",
+      "generation_type": "image_to_video",
+      "model": "veo-3.1-fast-generate-001",
+      "aspect_ratio": "9:16",
+      "duration_seconds": 8,
+      "technical_status": "passed",
+      "review_status": "partial",
+      "href": "./cases/issue-64-seated-dance/",
+      "poster": "../assets/media-lab/issue-64-seated-dance/video-poster.webp"
     }
   ]
 }
