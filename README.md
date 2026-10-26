@@ -10,7 +10,7 @@ The site is published in three languages:
 - Traditional Chinese: `/zh-tw/`
 - English: `/en/`
 
-Each page contains a language switcher plus canonical and `hreflang` metadata.
+Landing pages and Topic 01 have three language editions with language switching. Topic 02 currently has a Simplified Chinese edition only; all three landing pages link to that edition and clearly indicate the language. Topic 02 has its own canonical URL.
 
 ## Published content
 
@@ -25,6 +25,12 @@ Each page contains a language switcher plus canonical and `hreflang` metadata.
 - [`chatgpt-features-chat-work-codex/index.html`](./chatgpt-features-chat-work-codex/index.html) — Simplified Chinese.
 - [`zh-tw/chatgpt-features-chat-work-codex/index.html`](./zh-tw/chatgpt-features-chat-work-codex/index.html) — Traditional Chinese.
 - [`en/chatgpt-features-chat-work-codex/index.html`](./en/chatgpt-features-chat-work-codex/index.html) — English.
+
+### Topic 02 — Understanding MCP (Simplified Chinese)
+
+- [`mcp-understanding/index.html`](./mcp-understanding/index.html) — interactive conceptual guide; tool-call replay is clearly labeled as offline simulated data.
+- `assets/mcp-topic.css`, `assets/mcp-topic.js` — dedicated styles and deterministic offline interactions.
+- The source speaker notes and validators remain private in `xinhailxq/ai-sharing`.
 
 ## Shared assets
 
@@ -47,5 +53,6 @@ Public URLs:
 - `https://xinhailxq.github.io/ai-sharing-pages/`
 - `https://xinhailxq.github.io/ai-sharing-pages/zh-tw/`
 - `https://xinhailxq.github.io/ai-sharing-pages/en/`
+- `https://xinhailxq.github.io/ai-sharing-pages/mcp-understanding/` (Simplified Chinese only)
 
 This repository only contains material intended for public access. Source documents, drafts, presentation builders, and HyperFrames source files remain in the private `ai-sharing` repository.

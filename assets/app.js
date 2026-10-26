@@ -10,6 +10,8 @@ const langLinks = () => `<nav class="lang-switcher" aria-label="Language">
 
 function renderLanding() {
   const d = window.AI_SHARING_CONTENT.landing;
+  const mcpHref = lang === 'zh-CN' ? './mcp-understanding/' : '../mcp-understanding/';
+  const mcpCard = `<a class="card mcp-card" href="${mcpHref}" hreflang="zh-CN"><div><span class="tag">Topic 02 · UNDERSTANDING MCP</span><h2>${d.mcpTitle}</h2><p>${d.mcpSummary}</p><span class="mcp-locale-note">${d.mcpLangNote}</span></div><div class="visual mcp-visual" aria-hidden="true"><div class="mcp-chain"><span>AI HOST</span><b>⇄</b><span>MCP SERVER</span><b>⇄</b><span>GitHub / API</span></div></div></a>`;
   document.body.className = 'landing';
   app.innerHTML = `<div class="container">
     <header class="nav">
@@ -18,7 +20,7 @@ function renderLanding() {
     </header>
     <main>
       <section class="hero"><span class="eyebrow">PUBLIC KNOWLEDGE &amp; PRACTICE</span><h1>${d.hero}</h1><p>${d.intro}</p></section>
-      <section class="topics"><h2 class="section-title">${d.topics}</h2><a class="card" href="${config.topicHref}"><div><span class="tag">Topic 01 · ChatGPT Products</span><h2>${d.title}</h2><p>${d.summary}</p></div><div class="visual"><div class="trio"><div class="pill">Chat</div><div class="pill">Work</div><div class="pill">Codex</div></div></div></a></section>
+      <section class="topics"><h2 class="section-title">${d.topics}</h2><a class="card" href="${config.topicHref}"><div><span class="tag">Topic 01 · ChatGPT Products</span><h2>${d.title}</h2><p>${d.summary}</p></div><div class="visual"><div class="trio"><div class="pill">Chat</div><div class="pill">Work</div><div class="pill">Codex</div></div></div></a>${mcpCard}</section>
     </main>
     <footer>AI Sharing · Maintained by xinhailxq</footer>
   </div>`;
