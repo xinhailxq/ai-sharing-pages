@@ -13,3 +13,6 @@ a{color:inherit}.container{width:min(1120px,calc(100% - 32px));margin:auto}.nav{
 .mcp-chain span:nth-of-type(2){border-color:rgba(50,210,150,.6)}
 .mcp-chain b{font-size:17px;color:var(--green)}
 @media(max-width:480px){.mcp-chain{gap:5px}.mcp-chain span{padding:9px 7px;font-size:9px}.mcp-chain b{font-size:11px}}
+
+/* Topic 02 v3 launch card — additive, existing v2 card unchanged. */
+.mcp-v3-card{border-color:rgba(83,222,202,.5)}.mcp-v3-card:hover{border-color:#63e3d3}.mcp-v3-visual{background:radial-gradient(circle at 50% 48%,rgba(66,214,199,.19),transparent 70%),#0a1823}.v3-steps{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;padding:16px}.v3-steps span{border:1px solid rgba(111,228,211,.42);padding:13px 9px;border-radius:9px;color:#d4fffa;background:#16343b;font-size:10px;font-weight:850;letter-spacing:.05em}.v3-steps b{color:#77e2d6}@media(max-width:480px){.v3-steps{gap:6px}.v3-steps span{font-size:8px;padding:8px 6px}}
