@@ -56,3 +56,12 @@ Public URLs:
 - `https://xinhailxq.github.io/ai-sharing-pages/mcp-understanding/` (Simplified Chinese only)
 
 This repository only contains material intended for public access. Source documents, drafts, presentation builders, and HyperFrames source files remain in the private `ai-sharing` repository.
+
+## Topic 02 v3 — From MCP to Reliable Agents (2026-10-27)
+
+- [Interactive v3: MCP to Reliable Agents](./mcp-understanding/v3/index.html) — Simplified Chinese, responsive static Mission Control teaching website.
+- Public assets: `assets/mcp-v3.css`, `assets/mcp-v3.js`. Existing Topic 02 v2 remains available separately at `/mcp-understanding/`.
+- The homepage provides a translated v3 entry in zh-CN / zh-TW / en; the v3 article is currently Simplified Chinese.
+- FrameFlow Studio is fictional; every tool response, job, asset, approval, and graph state is a deterministic offline teaching simulation. **Not a live MCP call or real production workflow.**
+- Public URL: `https://xinhailxq.github.io/ai-sharing-pages/mcp-understanding/v3/`.
+- The full research archive, speaker notes, development readme, and validators remain exclusively in private `xinhailxq/ai-sharing`.
