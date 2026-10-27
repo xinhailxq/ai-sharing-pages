@@ -242,7 +242,7 @@
         if(missionPhase!=='inspected')return;
         missionPhase='awaiting';
         state('等待模拟审批','在本虚构场景中，下一步需要一个独立审批者明确允许后续示范写入，且已制定示例恢复规则。');
-        feedback('请求审批中','审批门槛与恢复条件均为教学假设，不对应 RRA 或任何真实业务流程。');
+        feedback('请求审批中','审批门槛与恢复条件均为教学假设，不对应任何真实产品或生产流程。');
         addEvent('请求独立审批','模拟提交：资产已存在、业务尚未注册，等待恢复资格判断。');
         break;
       case 'approve':
