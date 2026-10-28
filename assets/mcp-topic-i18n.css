@@ -1,0 +1,7 @@
+/* Topic 02 v2 multilingual navigation — additive to original presentation. */
+.topic02-lang{display:flex;align-items:center;gap:3px;border:1px solid var(--line);padding:3px;border-radius:10px;background:var(--panel);margin-left:auto;flex-shrink:0}
+.topic02-lang a{display:inline-flex;align-items:center;justify-content:center;min-width:29px;padding:5px 8px;border-radius:7px;font-size:12px;font-weight:800;color:var(--muted);text-decoration:none}
+.topic02-lang a:hover{background:var(--tint);color:var(--blue)}
+.topic02-lang a[aria-current="page"]{background:var(--blue);color:#fff}
+@media(max-width:700px){.topic02-lang a{min-width:24px;padding:5px;font-size:11px}.nav{gap:7px}.theme-toggle{margin-left:0;padding:7px 8px}}
+@media(max-width:400px){.topic02-lang{gap:0;padding:2px}.topic02-lang a{min-width:22px}}
