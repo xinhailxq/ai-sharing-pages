@@ -2,13 +2,19 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  // Both translated editions retain exactly the same state machine and controls.
+  const tr = value => {
+    if (typeof value !== 'string') return value;
+    if (typeof window.AI_SHARING_V3_TRANSLATE === 'function') return window.AI_SHARING_V3_TRANSLATE(value);
+    return (window.AI_SHARING_V3_I18N || {})[value] || value;
+  };
   const all = selector => [...document.querySelectorAll(selector)];
   const chapters = ['intro','roles','discovery','api','mission','reliability','beyond','sources'];
   let chapter = 'intro';
-  const text = (id, value) => { const el = $(id); if (el) el.textContent = value; };
+  const text = (id, value) => { const el = $(id); if (el) el.textContent = tr(value); };
   const line = (parent, tag, value, cls) => {
     const el = document.createElement(tag);
-    el.textContent = value;
+    el.textContent = tr(value);
     if (cls) el.className = cls;
     parent.append(el);
     return el;
@@ -40,6 +46,10 @@
     event.preventDefault(); go(el.dataset.route);
   }));
   all('[data-goto]').forEach(el => el.addEventListener('click', () => go(el.dataset.goto)));
+  // Switching languages retains the currently selected chapter when possible.
+  all('.v3-languages a').forEach(anchor => anchor.addEventListener('click', () => {
+    if (chapters.includes(location.hash.slice(1))) anchor.hash = location.hash;
+  }));
   $('prevChapter').addEventListener('click', () => go(chapters[Math.max(0,chapters.indexOf(chapter) - 1)]));
   $('nextChapter').addEventListener('click', () => go(chapters[Math.min(chapters.length - 1,chapters.indexOf(chapter) + 1)]));
   window.addEventListener('hashchange', () => {
@@ -49,7 +59,7 @@
   $('presentBtn').addEventListener('click', () => {
     const on = document.body.classList.toggle('presentation');
     $('presentBtn').setAttribute('aria-pressed', String(on));
-    $('presentBtn').title = on ? '退出演示模式' : '切换演示模式';
+    $('presentBtn').title = tr(on ? '退出演示模式' : '切换演示模式');
   });
   document.addEventListener('keydown', event => {
     if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
@@ -85,7 +95,7 @@
   function setToolFeedback(kind, msg) {
     const el = $('toolFeedback');
     el.className = 'arena-outcome ' + kind;
-    el.textContent = msg;
+    el.textContent = tr(msg);
   }
   all('[data-tool]').forEach(el => el.addEventListener('click', () => {
     const v = tools[el.dataset.tool]; setToolFeedback(v.kind, v.message);
@@ -95,7 +105,7 @@
     const enabled = event.target.checked;
     const db = document.querySelector('[data-tool="db"]');
     db.disabled = !enabled;
-    db.title = enabled ? '' : 'Host 未向本轮模型暴露此工具';
+    db.title = enabled ? '' : tr('Host 未向本轮模型暴露此工具');
     text('toolCount',enabled ? '4 TOOLS VISIBLE' : '3 TOOLS VISIBLE');
     setToolFeedback(enabled ? '' : 'bad', enabled
       ? '工具已暴露给模型。现在再考虑它是否是语义上合适的选择。'

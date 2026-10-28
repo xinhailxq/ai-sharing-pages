@@ -12,13 +12,13 @@ function renderLanding() {
   const d = window.AI_SHARING_CONTENT.landing;
   const mcpHref = lang === 'zh-CN' ? './mcp-understanding/' : '../mcp-understanding/';
   const mcpCard = `<a class="card mcp-card" href="${mcpHref}" hreflang="zh-CN"><div><span class="tag">Topic 02 · UNDERSTANDING MCP</span><h2>${d.mcpTitle}</h2><p>${d.mcpSummary}</p><span class="mcp-locale-note">${d.mcpLangNote}</span></div><div class="visual mcp-visual" aria-hidden="true"><div class="mcp-chain"><span>AI HOST</span><b>⇄</b><span>MCP SERVER</span><b>⇄</b><span>GitHub / API</span></div></div></a>`;
-  const v3Href = lang === 'zh-CN' ? './mcp-understanding/v3/' : '../mcp-understanding/v3/';
+  const v3Href = './mcp-understanding/v3/';
   const v3Copy = {
     'zh-CN': ['MCP：连接工具只是开始，Agent 如何真正完成任务？','亲自选择工具、处理超时和不确定状态，并通过 FrameFlow 离线模拟学习 Agent 可靠性。','简体中文 · 全程离线模拟'],
-    'zh-TW': ['MCP：連接工具只是開始，Agent 如何真正完成任務？','親自選擇工具、處理逾時與不確定狀態，透過 FrameFlow 離線模擬學習 Agent 可靠性。','簡體中文專題 · 離線互動模擬'],
-    'en': ['MCP: Connecting Tools Is Only the Beginning','Explore tool choice, partial failures and verification in an interactive, offline FrameFlow agent mission.','Simplified Chinese article · Offline simulation']
+    'zh-TW': ['MCP：連接工具只是開始，Agent 如何真正完成任務？','親自選擇工具、處理逾時與不確定狀態，透過 FrameFlow 離線模擬學習 Agent 可靠性。','繁體中文 · 離線互動模擬'],
+    'en': ['MCP: Connecting Tools Is Only the Beginning','Explore tool choice, partial failures and verification in an interactive, offline FrameFlow agent mission.','English · Offline simulation']
   }[lang];
-  const v3Card = `<a class="card mcp-v3-card" href="${v3Href}" hreflang="zh-CN"><div><span class="tag">Topic 02 v3 · RELIABLE AGENTS</span><h2>${v3Copy[0]}</h2><p>${v3Copy[1]}</p><span class="mcp-locale-note">${v3Copy[2]}</span></div><div class="visual mcp-v3-visual" aria-hidden="true"><div class="v3-steps"><span>CONNECT</span><b>→</b><span>DECIDE</span><b>→</b><span>VERIFY</span></div></div></a>`;
+  const v3Card = `<a class="card mcp-v3-card" href="${v3Href}" hreflang="${lang}"><div><span class="tag">Topic 02 v3 · RELIABLE AGENTS</span><h2>${v3Copy[0]}</h2><p>${v3Copy[1]}</p><span class="mcp-locale-note">${v3Copy[2]}</span></div><div class="visual mcp-v3-visual" aria-hidden="true"><div class="v3-steps"><span>CONNECT</span><b>→</b><span>DECIDE</span><b>→</b><span>VERIFY</span></div></div></a>`;
   document.body.className = 'landing';
   app.innerHTML = `<div class="container">
     <header class="nav">
