@@ -65,3 +65,15 @@ This repository only contains material intended for public access. Source docume
 - FrameFlow Studio is fictional; every tool response, job, asset, approval, and graph state is a deterministic offline teaching simulation. **Not a live MCP call or real production workflow.**
 - Public URL: `https://xinhailxq.github.io/ai-sharing-pages/mcp-understanding/v3/`.
 - The full research archive, speaker notes, development readme, and validators remain exclusively in private `xinhailxq/ai-sharing`.
+
+## Topic 02 v3 — Multilingual editions (2026-10-28)
+
+The complete interactive Topic 02 v3 experience is available in three languages:
+
+- [简体中文](./mcp-understanding/v3/index.html) — `/mcp-understanding/v3/`
+- [繁體中文](./zh-tw/mcp-understanding/v3/index.html) — `/zh-tw/mcp-understanding/v3/`
+- [English](./en/mcp-understanding/v3/index.html) — `/en/mcp-understanding/v3/`
+
+All three pages share `assets/mcp-v3.js` and `assets/mcp-v3.css`. Localized dynamic feedback is supplied by `assets/mcp-v3-en-locale.js` and `assets/mcp-v3-zh-tw-locale.js`. Each homepage entry and in-page language selector points to the relevant edition.
+
+The FrameFlow Studio scenario, actions, synthetic receipts and approvals remain **SIMULATED / OFFLINE**. Topic 02 v2 is unchanged. Full research, private speaker notes and validators remain in the private source repository.
