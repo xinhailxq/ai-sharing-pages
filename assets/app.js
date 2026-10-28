@@ -10,8 +10,13 @@ const langLinks = () => `<nav class="lang-switcher" aria-label="Language">
 
 function renderLanding() {
   const d = window.AI_SHARING_CONTENT.landing;
-  const mcpHref = lang === 'zh-CN' ? './mcp-understanding/' : '../mcp-understanding/';
-  const mcpCard = `<a class="card mcp-card" href="${mcpHref}" hreflang="zh-CN"><div><span class="tag">Topic 02 · UNDERSTANDING MCP</span><h2>${d.mcpTitle}</h2><p>${d.mcpSummary}</p><span class="mcp-locale-note">${d.mcpLangNote}</span></div><div class="visual mcp-visual" aria-hidden="true"><div class="mcp-chain"><span>AI HOST</span><b>⇄</b><span>MCP SERVER</span><b>⇄</b><span>GitHub / API</span></div></div></a>`;
+  const mcpHref = './mcp-understanding/';
+  const mcpNote = {
+    'zh-CN':'简体中文 · 完整互动指南',
+    'zh-TW':'繁體中文 · 完整互動指南',
+    'en':'English · Full interactive guide'
+  }[lang];
+  const mcpCard = `<a class="card mcp-card" href="${mcpHref}" hreflang="${lang}"><div><span class="tag">Topic 02 · UNDERSTANDING MCP</span><h2>${d.mcpTitle}</h2><p>${d.mcpSummary}</p><span class="mcp-locale-note">${mcpNote}</span></div><div class="visual mcp-visual" aria-hidden="true"><div class="mcp-chain"><span>AI HOST</span><b>⇄</b><span>MCP SERVER</span><b>⇄</b><span>GitHub / API</span></div></div></a>`;
   const v3Href = './mcp-understanding/v3/';
   const v3Copy = {
     'zh-CN': ['MCP：连接工具只是开始，Agent 如何真正完成任务？','亲自选择工具、处理超时和不确定状态，并通过 FrameFlow 离线模拟学习 Agent 可靠性。','简体中文 · 全程离线模拟'],
