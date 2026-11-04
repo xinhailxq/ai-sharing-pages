@@ -16,3 +16,15 @@ a{color:inherit}.container{width:min(1120px,calc(100% - 32px));margin:auto}.nav{
 
 /* Topic 02 v3 launch card — additive, existing v2 card unchanged. */
 .mcp-v3-card{border-color:rgba(83,222,202,.5)}.mcp-v3-card:hover{border-color:#63e3d3}.mcp-v3-visual{background:radial-gradient(circle at 50% 48%,rgba(66,214,199,.19),transparent 70%),#0a1823}.v3-steps{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;padding:16px}.v3-steps span{border:1px solid rgba(111,228,211,.42);padding:13px 9px;border-radius:9px;color:#d4fffa;background:#16343b;font-size:10px;font-weight:850;letter-spacing:.05em}.v3-steps b{color:#77e2d6}@media(max-width:480px){.v3-steps{gap:6px}.v3-steps span{font-size:8px;padding:8px 6px}}
+
+/* Topic 03 — Casbin authorization lab preview; additive to earlier topics. */
+.casbin-card{border-color:rgba(200,255,107,.42)}.casbin-card:hover{border-color:#c8ff6b}
+.casbin-card .mcp-locale-note{color:#c8ff6b}
+.casbin-visual{background:radial-gradient(circle at 70% 40%,rgba(200,255,107,.11),transparent 60%),#0b191b}
+.casbin-stack{position:relative;z-index:2;width:min(85%,320px);display:grid;gap:10px;text-align:center}
+.casbin-rule{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid rgba(174,227,166,.39);border-radius:8px;background:#132d2c;padding:13px 15px}
+.casbin-rule b{font:800 11px ui-monospace,SFMono-Regular,monospace;color:#c8ff6b}
+.casbin-rule span{font:650 11px ui-monospace,SFMono-Regular,monospace;color:#c2dfd4}
+.casbin-arrow{font:700 10px ui-monospace,SFMono-Regular,monospace;color:#a3ceab}
+.casbin-allow{border-radius:8px;background:#254030;padding:11px;color:#c8ff6b;font:800 12px ui-monospace,SFMono-Regular,monospace}
+@media(max-width:480px){.casbin-stack{width:92%}.casbin-rule{padding:10px 9px}.casbin-rule b,.casbin-rule span{font-size:9px}}
