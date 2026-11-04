@@ -84,3 +84,15 @@ The complete interactive Topic 02 v3 experience is available in three languages:
 All three pages share `assets/mcp-v3.js` and `assets/mcp-v3.css`. Localized dynamic feedback is supplied by `assets/mcp-v3-en-locale.js` and `assets/mcp-v3-zh-tw-locale.js`. Each homepage entry and in-page language selector points to the relevant edition.
 
 The FrameFlow Studio scenario, actions, synthetic receipts and approvals remain **SIMULATED / OFFLINE**. Topic 02 v2 is unchanged. Full research, private speaker notes and validators remain in the private source repository.
+
+## Topic 03 — Casbin: From RBAC to ABAC (2026-11-04)
+
+- [简体中文](./casbin/index.html) — `/casbin/`
+- [繁體中文](./zh-tw/casbin/index.html) — `/zh-tw/casbin/`
+- [English](./en/casbin/index.html) — `/en/casbin/`
+
+A standalone, responsive interactive teaching page covering the Casbin authorization engine, PERM (Policy / Effect / Request / Matchers), ACL, RBAC, ABAC, RBAC with tenant domains, model migration, and adoption tradeoffs. All three languages use the same static first-party `assets/casbin-topic.js` and `assets/casbin-topic.css`. The language-specific landing pages link directly to their Topic 03 edition using the shared `assets/app.js` renderer.
+
+**Security and evidence boundary:** all access requests, policy rows, users, tenants, outcomes and traces are **deterministic, synthetic, browser-side simulations**. This site does not execute Casbin SDK code, call a real enforcer, authenticate users, or query production data; never rely on it as an access-control point. Real integrations must test model/policy compatibility and enforce authorization within a trusted application layer. The technical source notes, validators and 35–40 minute speaker notes remain in the private `xinhailxq/ai-sharing` repository. Primary references are linked from the Topic 03 site to official Apache Casbin documentation.
+
+Published with explicit Topic 03 user approval on 2026-11-04. Private source: [ai-sharing PR #8](https://github.com/xinhailxq/ai-sharing/pull/8). Public release history is traceable through Git commits and the private `knowledge/releases/topic-03-casbin-2026-11-04.md` record. Prior Topics 01 and 02 are unchanged.

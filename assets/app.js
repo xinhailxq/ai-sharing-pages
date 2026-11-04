@@ -24,6 +24,13 @@ function renderLanding() {
     'en': ['MCP: Connecting Tools Is Only the Beginning','Explore tool choice, partial failures and verification in an interactive, offline FrameFlow agent mission.','English · Offline simulation']
   }[lang];
   const v3Card = `<a class="card mcp-v3-card" href="${v3Href}" hreflang="${lang}"><div><span class="tag">Topic 02 v3 · RELIABLE AGENTS</span><h2>${v3Copy[0]}</h2><p>${v3Copy[1]}</p><span class="mcp-locale-note">${v3Copy[2]}</span></div><div class="visual mcp-v3-visual" aria-hidden="true"><div class="v3-steps"><span>CONNECT</span><b>→</b><span>DECIDE</span><b>→</b><span>VERIFY</span></div></div></a>`;
+  const casbinHref = './casbin/';
+  const casbinCopy = {
+    'zh-CN': ['Casbin：从 RBAC 到 ABAC，如何设计可演进的权限系统？','理解权限模型与 Enforcer，在离线实验室中切换 ACL、RBAC、ABAC 与多租户规则。','简体中文 · 互动权限实验室'],
+    'zh-TW': ['Casbin：從 RBAC 到 ABAC，如何設計可演進的權限系統？','理解權限模型與 Enforcer，在離線實驗室切換 ACL、RBAC、ABAC 與多租戶規則。','繁體中文 · 互動權限實驗室'],
+    'en': ['Casbin: From RBAC to ABAC — Authorization That Evolves','Explore models and the Enforcer through a self-contained ACL, RBAC, ABAC and tenant-scoped policy lab.','English · Interactive policy lab']
+  }[lang];
+  const casbinCard = `<a class="card casbin-card" href="${casbinHref}" hreflang="${lang}"><div><span class="tag">Topic 03 · UNDERSTANDING CASBIN</span><h2>${casbinCopy[0]}</h2><p>${casbinCopy[1]}</p><span class="mcp-locale-note">${casbinCopy[2]}</span></div><div class="visual casbin-visual" aria-hidden="true"><div class="casbin-stack"><div class="casbin-rule"><b>REQUEST</b><span>sub / obj / act</span></div><div class="casbin-arrow">↓ POLICY + MATCHER</div><div class="casbin-rule"><b>ENFORCER</b><span>ACL · RBAC · ABAC</span></div><div class="casbin-allow">ALLOW ✓ &nbsp; / &nbsp; DENY ×</div></div></div></a>`;
   document.body.className = 'landing';
   app.innerHTML = `<div class="container">
     <header class="nav">
@@ -32,7 +39,7 @@ function renderLanding() {
     </header>
     <main>
       <section class="hero"><span class="eyebrow">PUBLIC KNOWLEDGE &amp; PRACTICE</span><h1>${d.hero}</h1><p>${d.intro}</p></section>
-      <section class="topics"><h2 class="section-title">${d.topics}</h2><a class="card" href="${config.topicHref}"><div><span class="tag">Topic 01 · ChatGPT Products</span><h2>${d.title}</h2><p>${d.summary}</p></div><div class="visual"><div class="trio"><div class="pill">Chat</div><div class="pill">Work</div><div class="pill">Codex</div></div></div></a>${mcpCard}${v3Card}</section>
+      <section class="topics"><h2 class="section-title">${d.topics}</h2><a class="card" href="${config.topicHref}"><div><span class="tag">Topic 01 · ChatGPT Products</span><h2>${d.title}</h2><p>${d.summary}</p></div><div class="visual"><div class="trio"><div class="pill">Chat</div><div class="pill">Work</div><div class="pill">Codex</div></div></div></a>${mcpCard}${v3Card}${casbinCard}</section>
     </main>
     <footer>AI Sharing · Maintained by xinhailxq</footer>
   </div>`;
