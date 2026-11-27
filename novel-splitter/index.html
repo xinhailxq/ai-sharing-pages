@@ -1,0 +1,2612 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>墨卷 · 中文小说 TXT 智能拆分器</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+  <style>
+    :root {
+      /* 日间 · 宣纸素笺 */
+      --bg-page: #F6F2EA;
+      --bg-card: #FFFDF9;
+      --bg-subtle: #EFEAE0;
+      --bg-input: #FAF7F2;
+      --border: #E2DACB;
+      --border-strong: #CFC4B0;
+      --text-primary: #241F1B;
+      --text-secondary: #645B52;
+      --text-muted: #93887D;
+      --accent: #B83B2A;        /* 朱砂印泥 */
+      --accent-hover: #9C2E1F;
+      --accent-soft: rgba(184, 59, 42, 0.10);
+      --ok: #2E7D5B;
+      --ok-soft: rgba(46, 125, 91, 0.12);
+      --warn: #B86E1A;
+      --warn-soft: rgba(184, 110, 26, 0.13);
+      --danger: #C0392B;
+      --danger-soft: rgba(192, 57, 43, 0.12);
+      --shadow-sm: 0 1px 2px rgba(36, 31, 27, 0.05);
+      --shadow-md: 0 8px 24px rgba(36, 31, 27, 0.06);
+      --shadow-lg: 0 18px 44px rgba(24, 20, 17, 0.14);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    }
+
+    [data-theme="dark"] {
+      /* 夜间 · 松烟墨夜 */
+      --bg-page: #141312;
+      --bg-card: #1D1B19;
+      --bg-subtle: #262320;
+      --bg-input: #171614;
+      --border: #312D28;
+      --border-strong: #464039;
+      --text-primary: #ECE6DC;
+      --text-secondary: #ABA196;
+      --text-muted: #787067;
+      --accent: #D65A47;
+      --accent-hover: #E36D5B;
+      --accent-soft: rgba(214, 90, 71, 0.16);
+      --ok: #4CA87F;
+      --ok-soft: rgba(76, 168, 127, 0.16);
+      --warn: #DFA048;
+      --warn-soft: rgba(223, 160, 72, 0.16);
+      --danger: #E06658;
+      --danger-soft: rgba(224, 102, 88, 0.16);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.30);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(var(--border) 0.6px, transparent 0.6px);
+      background-size: 24px 24px;
+      opacity: 0.32;
+      z-index: 0;
+    }
+
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px 20px 100px;
+    }
+
+    /* 顶部栏 */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      margin-bottom: 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .seal-logo {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #FFFDF9;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: 1px;
+      box-shadow: inset 0 0 0 2px rgba(255, 253, 249, 0.28);
+      user-select: none;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-text p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .badge-local {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* 通用按钮 */
+    button, .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 8px 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.16s ease;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--border-strong);
+      background: var(--bg-subtle);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0.5px);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #FFFDF9;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .btn-icon {
+      padding: 8px;
+      width: 36px;
+      height: 36px;
+    }
+
+    /* 主双栏布局 */
+    .workspace {
+      display: grid;
+      grid-template-columns: 405px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .panel + .panel {
+      margin-top: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-num {
+      width: 21px;
+      height: 21px;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .panel-body {
+      padding: 16px 18px;
+    }
+
+    /* 拖拽上传区 */
+    .dropzone {
+      position: relative;
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .dropzone-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 10px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+    }
+
+    .dropzone-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .dropzone-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .file-summary {
+      margin-top: 12px;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .file-meta {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-stats {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 清洗结果胶囊 */
+    .cleanup-pill {
+      margin-top: 10px;
+      padding: 7px 11px;
+      border-radius: var(--radius-sm);
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* 编码预览书页框 */
+    .encoding-row {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .encoding-row label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .encoding-tag {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .sample-paper {
+      margin-top: 8px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      font-family: var(--font-serif);
+      font-size: 13px;
+      line-height: 1.75;
+      color: var(--text-primary);
+      max-height: 148px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* 表单控件 */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-hint {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      line-height: 1.45;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .input-mono {
+      font-family: var(--font-mono) !important;
+      font-size: 12.5px !important;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* 分段切换器 */
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 10px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+    }
+
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 8px 10px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .segmented button.active {
+      background: var(--bg-card);
+      color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 快捷芯片 */
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .chip {
+      padding: 4px 9px;
+      font-size: 11.5px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .chip.active, .chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    /* 复选框行 */
+    .check-stack {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+      line-height: 1.45;
+    }
+
+    .check-row input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    /* 命名预览框 */
+    .name-preview {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+
+    /* 折叠高级设置 */
+    details.advanced-box {
+      margin-top: 14px;
+      border-top: 1px dashed var(--border);
+      padding-top: 11px;
+    }
+
+    details.advanced-box summary {
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    details.advanced-box summary::-webkit-details-marker { display: none; }
+    details.advanced-box summary::after {
+      content: "展开 ▾";
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    details.advanced-box[open] summary::after {
+      content: "收起 ▴";
+    }
+
+    .advanced-inner {
+      margin-top: 12px;
+    }
+
+    .error-msg {
+      margin-top: 6px;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-size: 12px;
+    }
+
+    /* 右侧统计指标卡 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-family: var(--font-serif);
+      font-size: 21px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
+
+    .kpi-sub {
+      margin-top: 3px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    /* 提示横幅 */
+    .notice-banner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 15px;
+      margin-bottom: 14px;
+      border-radius: var(--radius-md);
+      background: var(--warn-soft);
+      border: 1px solid rgba(184, 110, 26, 0.28);
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+
+    .notice-banner.ok {
+      background: var(--ok-soft);
+      border-color: rgba(46, 125, 91, 0.28);
+    }
+
+    .notice-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    /* ZIP 打包进度条 */
+    .zip-progress-wrap {
+      margin-bottom: 14px;
+      padding: 12px 15px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .zip-progress-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 7px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.12s linear;
+    }
+
+    /* 结果分卷列表 */
+    .results-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chunk-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px 18px;
+    }
+
+    .chunk-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      padding: 13px 15px;
+      transition: border-color 0.16s ease;
+    }
+
+    .chunk-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .chunk-card.is-over {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .chunk-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .chunk-title-wrap {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .chunk-filename {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      word-break: break-all;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .chunk-idx-badge {
+      padding: 1px 6px;
+      border-radius: 5px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-weight: 600;
+    }
+
+    .badge-accent {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: transparent;
+    }
+
+    .badge-ok {
+      color: var(--ok);
+      background: var(--ok-soft);
+      border-color: transparent;
+    }
+
+    .badge-warn {
+      color: var(--warn);
+      background: var(--warn-soft);
+      border-color: transparent;
+    }
+
+    .chunk-range {
+      margin-top: 6px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .chunk-range-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chunk-range-tag {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-right: 5px;
+    }
+
+    .chunk-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .chunk-meter {
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .meter-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meter-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 170px;
+      flex: 0 1 220px;
+    }
+
+    .meter-track {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      overflow: hidden;
+    }
+
+    .meter-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--ok);
+    }
+    .meter-fill.warn { background: var(--warn); }
+    .meter-fill.danger { background: var(--danger); }
+
+    .meter-pct {
+      font-size: 11.5px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      min-width: 44px;
+      text-align: right;
+    }
+    .meter-pct.ok { color: var(--ok); }
+    .meter-pct.warn { color: var(--warn); }
+    .meter-pct.danger { color: var(--danger); }
+
+    /* 空状态 */
+    .empty-state {
+      padding: 58px 24px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-glyph {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 14px;
+      border-radius: 16px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: var(--accent);
+    }
+
+    .empty-state h3 {
+      margin: 0 0 6px;
+      font-family: var(--font-serif);
+      font-size: 17px;
+      color: var(--text-primary);
+    }
+
+    .empty-state p {
+      margin: 0 auto 18px;
+      max-width: 440px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* 抽检详情弹窗 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 13, 11, 0.56);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 780px;
+      max-height: 86vh;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .modal-body {
+      padding: 16px 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .toc-box {
+      max-height: 175px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      padding: 6px 10px;
+      font-size: 12.5px;
+    }
+
+    .toc-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 3px 4px;
+      border-bottom: 1px dashed rgba(147, 136, 125, 0.16);
+    }
+
+    .toc-row:last-child { border-bottom: none; }
+
+    .toc-row-title {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toc-row-meta {
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .excerpt-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      padding: 12px 14px;
+      font-family: var(--font-serif);
+      font-size: 13.5px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* 手机端底部吸顶打包栏 */
+    .mobile-sticky-bar {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.08);
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .mobile-bar-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    .mobile-bar-meta strong {
+      color: var(--text-primary);
+      font-size: 13.5px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Toast 提示 */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-16px);
+      background: var(--text-primary);
+      color: var(--bg-card);
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.22s ease;
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 响应式适配（平板 & 手机） */
+    @media (max-width: 980px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app-shell {
+        padding: 12px 12px 92px;
+      }
+      .topbar {
+        padding: 10px 12px;
+        border-radius: var(--radius-md);
+      }
+      .badge-local {
+        display: none;
+      }
+      .brand-text h1 {
+        font-size: 16px;
+      }
+      .panel-header {
+        padding: 12px 14px;
+      }
+      .panel-body, .chunk-list {
+        padding: 13px 14px;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .chunk-top {
+        flex-direction: column;
+      }
+      .chunk-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+      .meter-bar-wrap {
+        width: 100%;
+        flex: 1 1 100%;
+      }
+      .mobile-sticky-bar.visible {
+        display: flex;
+      }
+      .desktop-zip-btn {
+        display: none;
+      }
+      .notice-banner {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 顶部栏 -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="seal-logo" aria-hidden="true">墨</div>
+        <div class="brand-text">
+          <h1>墨卷 · 中文小说 TXT 拆分器</h1>
+          <p>严格对齐章节边界 · 自动防乱码与旧版排版清洗 · 专为 NotebookLM 50 万字上限优化</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="badge-local" title="所有文本仅在当前浏览器内存中处理，绝不上传至任何服务器">
+          <span class="badge-dot"></span>纯本地运行
+        </span>
+        <button id="themeToggle" class="btn-icon" title="切换日间宣纸 / 夜间松烟主题" aria-label="切换主题">🌙</button>
+      </div>
+    </header>
+
+    <!-- 主工作区 -->
+    <main class="workspace">
+      <!-- 左侧：导入与配置 -->
+      <aside class="sidebar">
+        <!-- 卡片 1：文件载入与编码 -->
+        <section class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span class="step-num">1</span>载入文本与编码校对</h2>
+            <button id="loadSampleBtn" class="btn-ghost btn-sm" title="生成一份含多种异构标题与残留标签的 104 章示例小说">载入示例</button>
+          </div>
+          <div class="panel-body">
+            <input id="fileInput" type="file" accept=".txt,text/plain" class="hidden" />
+            <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="点击或拖入 TXT 小说文件">
+              <div class="dropzone-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/>
+                  <polyline points="9 15 12 12 15 15"/>
+                </svg>
+              </div>
+              <div class="dropzone-title">拖入 TXT 文件，或点击选择</div>
+              <div class="dropzone-sub">自动兼容 UTF-8 / GB18030 / GBK · 百万字长篇流畅处理</div>
+            </div>
+
+            <div id="fileSummary" class="file-summary hidden">
+              <div class="file-meta">
+                <div id="fileNameDisplay" class="file-name">-</div>
+                <div id="fileStatsDisplay" class="file-stats">-</div>
+              </div>
+              <button id="reselectBtn" class="btn-sm">换文件</button>
+            </div>
+
+            <div id="cleanupPill" class="cleanup-pill hidden">
+              <span id="cleanupPillText"></span>
+            </div>
+
+            <div id="encodingSection" class="hidden">
+              <div class="encoding-row">
+                <label for="encodingSelect">文件编码 <span id="detectedEncodingTag" class="encoding-tag">自动</span></label>
+                <select id="encodingSelect" style="width: auto; min-width: 155px; padding: 5px 9px; font-size: 12.5px;">
+                  <option value="auto">自动识别 (UTF-8 / GBK)</option>
+                  <option value="utf-8">UTF-8</option>
+                  <option value="gb18030">GB18030 / GBK (简体老书)</option>
+                  <option value="big5">Big5 (繁体中文)</option>
+                  <option value="utf-16le">UTF-16 LE</option>
+                  <option value="utf-16be">UTF-16 BE</option>
+                </select>
+              </div>
+              <div class="form-hint">前 500 字预览（已同步应用清洗规则；若见乱码请切换上方编码）：</div>
+              <div id="samplePaper" class="sample-paper"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 卡片 2：拆分策略与命名 -->
+        <section class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span class="step-num">2</span>拆分模式与导出命名</h2>
+          </div>
+          <div class="panel-body">
+            <!-- 拆分模式 -->
+            <div class="form-group">
+              <div class="form-label">拆分模式</div>
+              <div class="segmented" role="tablist">
+                <button id="modeChaptersBtn" class="active" type="button" role="tab" aria-selected="true">按章节数合并</button>
+                <button id="modeCharsBtn" type="button" role="tab" aria-selected="false">按字数上限合并</button>
+              </div>
+            </div>
+
+            <!-- 模式参数：章节数 -->
+            <div id="chaptersParamGroup" class="form-group">
+              <label class="form-label" for="chaptersPerFile">
+                <span>每份合并章节数</span>
+                <span style="font-weight: 400; color: var(--text-muted);">建议 30 ~ 100 章</span>
+              </label>
+              <input id="chaptersPerFile" type="number" min="1" max="5000" value="50" />
+              <div class="chip-row">
+                <button type="button" class="chip" data-chap-preset="30">30 章</button>
+                <button type="button" class="chip active" data-chap-preset="50">50 章</button>
+                <button type="button" class="chip" data-chap-preset="80">80 章</button>
+                <button type="button" class="chip" data-chap-preset="100">100 章</button>
+              </div>
+            </div>
+
+            <!-- 模式参数：字数上限 -->
+            <div id="charsParamGroup" class="form-group hidden">
+              <label class="form-label" for="maxCharsPerFile">
+                <span>每份字数上限（自动对齐章节边界）</span>
+                <span style="font-weight: 400; color: var(--text-muted);">NotebookLM 上限 50 万</span>
+              </label>
+              <input id="maxCharsPerFile" type="number" min="1000" max="5000000" step="10000" value="350000" />
+              <div class="chip-row">
+                <button type="button" class="chip" data-char-preset="200000">20 万字</button>
+                <button type="button" class="chip active" data-char-preset="350000">35 万字（推荐）</button>
+                <button type="button" class="chip" data-char-preset="450000">45 万字</button>
+              </div>
+            </div>
+
+            <!-- 智能排版与合并选项 -->
+            <div class="form-group">
+              <div class="form-label">老旧文本清洗与分卷优化</div>
+              <div class="check-stack">
+                <label class="check-row">
+                  <input id="mergeSmallTail" type="checkbox" checked />
+                  <span>尾卷过小时自动并入上一份（不足目标 25% 且合并后不超过 50 万字）</span>
+                </label>
+                <label class="check-row">
+                  <input id="cleanHtmlTags" type="checkbox" checked />
+                  <span>清理残留网页标签（如 <code>&lt;p&gt;</code>、<code>&lt;br&gt;</code>、<code>&amp;nbsp;</code>）</span>
+                </label>
+                <label class="check-row">
+                  <input id="cleanNoise" type="checkbox" checked />
+                  <span>清理异常空白符（如 <code></code>）、装饰长横线并压缩多余空行</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 导出命名 -->
+            <div class="grid-2 form-group">
+              <div>
+                <label class="form-label" for="filePrefix">文件前缀</label>
+                <input id="filePrefix" type="text" value="【原著】" placeholder="可留空" />
+              </div>
+              <div>
+                <label class="form-label" for="bookTitle">书名</label>
+                <input id="bookTitle" type="text" value="未命名小说" placeholder="输入书名" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">导出文件名预览</div>
+              <div id="namePreview" class="name-preview">【原著】未命名小说_01_第001-050章.txt</div>
+            </div>
+
+            <!-- 高级设置：章节正则与防误判 -->
+            <details class="advanced-box">
+              <summary>章节识别正则与防误判设置</summary>
+              <div class="advanced-inner">
+                <div class="form-group">
+                  <div class="form-label">正则预设</div>
+                  <div class="chip-row" id="regexPresets">
+                    <button type="button" class="chip active" data-regex="standard">增强中文（推荐）</button>
+                    <button type="button" class="chip" data-regex="strict">仅“第X章/回”</button>
+                    <button type="button" class="chip" data-regex="relaxed">宽松（含纯数字）</button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="regexInput">自定义章节正则（严格行首匹配）</label>
+                  <input id="regexInput" class="input-mono" type="text" />
+                  <div id="regexError" class="error-msg hidden"></div>
+                  <div class="form-hint">默认已兼容「第 七 章」（字间空格）与「三十九章」（省“第”字）等旧版电子书格式。</div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="maxTitleLength">标题最大字数过滤（防正文台词误判）</label>
+                  <input id="maxTitleLength" type="number" min="8" max="200" value="45" />
+                </div>
+
+                <div class="check-stack">
+                  <label class="check-row">
+                    <input id="mergePrologue" type="checkbox" checked />
+                    <span>卷首简介 / 楔子自动并入第 1 份文件</span>
+                  </label>
+                  <label class="check-row">
+                    <input id="excludeWhitespace" type="checkbox" checked />
+                    <span>按有效字数统计（不计空格与换行）</span>
+                  </label>
+                  <label class="check-row">
+                    <input id="paragraphFallback" type="checkbox" />
+                    <span>强制使用“段落边界兜底切分”（无章节号文本适用）</span>
+                  </label>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+      </aside>
+
+      <!-- 右侧：分析结果与导出 -->
+      <section class="main-col">
+        <!-- 指标概览 -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">总字数</div>
+            <div id="kpiTotalChars" class="kpi-value">—</div>
+            <div id="kpiFileSize" class="kpi-sub">等待载入文件</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">识别章节</div>
+            <div id="kpiChapters" class="kpi-value">—</div>
+            <div id="kpiAvgChars" class="kpi-sub">均章字数 —</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">即将生成</div>
+            <div id="kpiChunks" class="kpi-value">—</div>
+            <div id="kpiModeDesc" class="kpi-sub">按章节数合并</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">NotebookLM 适配</div>
+            <div id="kpiSafety" class="kpi-value">—</div>
+            <div id="kpiMaxChunk" class="kpi-sub">单份上限 50 万字</div>
+          </div>
+        </div>
+
+        <!-- 警告或状态横幅 -->
+        <div id="noticeBanner" class="notice-banner hidden">
+          <div id="noticeText"></div>
+          <div id="noticeActions" class="notice-actions"></div>
+        </div>
+
+        <!-- ZIP 打包进度 -->
+        <div id="zipProgressWrap" class="zip-progress-wrap hidden">
+          <div class="zip-progress-head">
+            <span id="zipProgressLabel">正在打包 ZIP…</span>
+            <span id="zipProgressPct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="zipProgressBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- 导出文件列表卡片 -->
+        <section class="panel">
+          <div class="panel-header results-toolbar">
+            <h2 class="panel-title"><span class="step-num">3</span>分卷预览与下载</h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button id="downloadZipBtn" class="btn-primary desktop-zip-btn" disabled>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                一键打包下载 ZIP
+              </button>
+            </div>
+          </div>
+
+          <div id="emptyState" class="empty-state">
+            <div class="empty-glyph">卷</div>
+            <h3>尚未载入小说文件</h3>
+            <p>把中文 TXT 拖入左侧区域，即可自动检测编码、清洗老旧排版标签、精准识别章节并预览拆分方案。全程离线在本地浏览器运行，不上传任何文本。</p>
+            <button id="emptySampleBtn" class="btn-primary">先用内置示例试一下</button>
+          </div>
+
+          <div id="chunkList" class="chunk-list hidden"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- 手机端底部吸顶打包栏 -->
+  <div id="mobileStickyBar" class="mobile-sticky-bar">
+    <div class="mobile-bar-meta">
+      <div>共 <strong id="mobileChunkCount">0</strong> 份文件</div>
+      <div id="mobileMaxWarn">适配 NotebookLM</div>
+    </div>
+    <button id="mobileZipBtn" class="btn-primary" disabled>一键打包 ZIP</button>
+  </div>
+
+  <!-- 单卷详情抽检弹窗 -->
+  <div id="previewModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">-</h3>
+        <button id="closeModalBtn" class="btn-icon" aria-label="关闭">✕</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="modal-section-title">
+            <span>包含章节目录</span>
+            <span id="modalTocMeta"></span>
+          </div>
+          <div id="modalToc" class="toc-box"></div>
+        </div>
+        <div>
+          <div class="modal-section-title">
+            <span>开头内容抽检（前 600 字）</span>
+            <span>核对章节起点与清洗效果</span>
+          </div>
+          <div id="modalHeadExcerpt" class="excerpt-box"></div>
+        </div>
+        <div>
+          <div class="modal-section-title">
+            <span>结尾内容抽检（末 400 字）</span>
+            <span>核对无半章截断</span>
+          </div>
+          <div id="modalTailExcerpt" class="excerpt-box"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalCloseFooterBtn">关闭</button>
+        <button id="modalDownloadBtn" class="btn-primary">下载此分卷 (.txt)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const NOTEBOOKLM_LIMIT = 500000;
+      const LARGE_CHAPTER_WARN = 30000; // 单章超过 3 万字在抽检目录中提示可核查
+
+      // 升级后的章节正则预设：兼容「第 七 章」（字间空格）、「三十九章」（省“第”字）及异常空白分隔符
+      const REGEX_PRESETS = {
+        standard: '^(?:第[\\s ]*[零〇一二三四五六七八九十百千万两0-9]+[\\s ]*[章回节卷集部篇话]|[零〇一二三四五六七八九十百千万两0-9]+[\\s ]*[章回节]|(?:卷|篇|部)[\\s ]*[零〇一二三四五六七八九十百千万两0-9]+|序[章言幕]?|楔子|引子|前言|尾声|终章|后记|番外(?:[\\s ]*[一二三四五六七八九十0-9]*)?)(?:[\\s \\u00A0\\uE000-\\uF8FF：:、.．\\-—]|$)',
+        strict: '^第[\\s ]*[零〇一二三四五六七八九十百千万两0-9]+[\\s ]*[章回节](?:[\\s \\u00A0\\uE000-\\uF8FF：:、.．\\-—]|$)',
+        relaxed: '^(?:第[\\s ]*[零〇一二三四五六七八九十百千万两0-9]+[\\s ]*[章回节卷集部篇话]|[零〇一二三四五六七八九十百千万两0-9]+[\\s ]*[章回节]|(?:卷|篇|部|Chapter|CHAPTER)[\\s ]*[零〇一二三四五六七八九十百千万两0-9]+|[0-9]{1,4}[\\.、\\s ]+\\S+|序[章言幕]?|楔子|引子|前言|尾声|终章|后记|番外(?:[\\s ]*[一二三四五六七八九十0-9]*)?)(?:[\\s \\u00A0\\uE000-\\uF8FF：:、.．\\-—]|$)'
+      };
+
+      const state = {
+        buffer: null,
+        rawFileName: '',
+        fileSize: 0,
+        detectedEncoding: '',
+        encodingMode: 'auto',
+        rawText: '',
+        text: '',
+        totalChars: 0,
+        mode: 'chapters', // 'chapters' | 'chars'
+        chaptersPerFile: 50,
+        maxCharsPerFile: 350000,
+        prefix: '【原著】',
+        bookTitle: '未命名小说',
+        regexStr: REGEX_PRESETS.standard,
+        maxTitleLength: 45,
+        mergeSmallTail: true,
+        cleanHtmlTags: true,
+        cleanNoise: true,
+        mergePrologue: true,
+        excludeWhitespace: true,
+        paragraphFallback: false,
+        cleanupStats: { htmlTagCount: 0, dividerCount: 0, weirdSpaceCount: 0, total: 0 },
+        prologue: null,
+        chapters: [],
+        chunks: [],
+        activeModalChunkIdx: -1
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const els = {
+        themeToggle: $('themeToggle'),
+        fileInput: $('fileInput'),
+        dropzone: $('dropzone'),
+        reselectBtn: $('reselectBtn'),
+        loadSampleBtn: $('loadSampleBtn'),
+        emptySampleBtn: $('emptySampleBtn'),
+        fileSummary: $('fileSummary'),
+        fileNameDisplay: $('fileNameDisplay'),
+        fileStatsDisplay: $('fileStatsDisplay'),
+        cleanupPill: $('cleanupPill'),
+        cleanupPillText: $('cleanupPillText'),
+        encodingSection: $('encodingSection'),
+        encodingSelect: $('encodingSelect'),
+        detectedEncodingTag: $('detectedEncodingTag'),
+        samplePaper: $('samplePaper'),
+        modeChaptersBtn: $('modeChaptersBtn'),
+        modeCharsBtn: $('modeCharsBtn'),
+        chaptersParamGroup: $('chaptersParamGroup'),
+        charsParamGroup: $('charsParamGroup'),
+        chaptersPerFile: $('chaptersPerFile'),
+        maxCharsPerFile: $('maxCharsPerFile'),
+        mergeSmallTail: $('mergeSmallTail'),
+        cleanHtmlTags: $('cleanHtmlTags'),
+        cleanNoise: $('cleanNoise'),
+        filePrefix: $('filePrefix'),
+        bookTitle: $('bookTitle'),
+        namePreview: $('namePreview'),
+        regexInput: $('regexInput'),
+        regexError: $('regexError'),
+        regexPresets: $('regexPresets'),
+        maxTitleLength: $('maxTitleLength'),
+        mergePrologue: $('mergePrologue'),
+        excludeWhitespace: $('excludeWhitespace'),
+        paragraphFallback: $('paragraphFallback'),
+        kpiTotalChars: $('kpiTotalChars'),
+        kpiFileSize: $('kpiFileSize'),
+        kpiChapters: $('kpiChapters'),
+        kpiAvgChars: $('kpiAvgChars'),
+        kpiChunks: $('kpiChunks'),
+        kpiModeDesc: $('kpiModeDesc'),
+        kpiSafety: $('kpiSafety'),
+        kpiMaxChunk: $('kpiMaxChunk'),
+        noticeBanner: $('noticeBanner'),
+        noticeText: $('noticeText'),
+        noticeActions: $('noticeActions'),
+        zipProgressWrap: $('zipProgressWrap'),
+        zipProgressLabel: $('zipProgressLabel'),
+        zipProgressPct: $('zipProgressPct'),
+        zipProgressBar: $('zipProgressBar'),
+        downloadZipBtn: $('downloadZipBtn'),
+        mobileStickyBar: $('mobileStickyBar'),
+        mobileChunkCount: $('mobileChunkCount'),
+        mobileMaxWarn: $('mobileMaxWarn'),
+        mobileZipBtn: $('mobileZipBtn'),
+        emptyState: $('emptyState'),
+        chunkList: $('chunkList'),
+        previewModal: $('previewModal'),
+        modalTitle: $('modalTitle'),
+        modalTocMeta: $('modalTocMeta'),
+        modalToc: $('modalToc'),
+        modalHeadExcerpt: $('modalHeadExcerpt'),
+        modalTailExcerpt: $('modalTailExcerpt'),
+        closeModalBtn: $('closeModalBtn'),
+        modalCloseFooterBtn: $('modalCloseFooterBtn'),
+        modalDownloadBtn: $('modalDownloadBtn'),
+        toast: $('toast')
+      };
+
+      // --- 主题切换 ---
+      function initTheme() {
+        const saved = localStorage.getItem('mojuan-theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        els.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        els.themeToggle.title = theme === 'dark' ? '切换至日间宣纸主题' : '切换至夜间松烟主题';
+        localStorage.setItem('mojuan-theme', theme);
+      }
+
+      els.themeToggle.addEventListener('click', () => {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+      });
+
+      // --- Toast ---
+      let toastTimer = null;
+      function showToast(msg) {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => els.toast.classList.remove('show'), 2600);
+      }
+
+      // --- 工具函数 ---
+      function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+      }
+
+      function formatNumber(num) {
+        return Number(num || 0).toLocaleString('zh-CN');
+      }
+
+      function formatWan(num) {
+        if (num >= 10000) return (num / 10000).toFixed(2) + ' 万字';
+        return formatNumber(num) + ' 字';
+      }
+
+      function countCharsRange(text, start, end, excludeWhitespace) {
+        if (!excludeWhitespace) return Math.max(0, end - start);
+        let count = 0;
+        for (let i = start; i < end; i++) {
+          const c = text.charCodeAt(i);
+          if (c > 32 && c !== 0x3000 && c !== 0xFEFF && c !== 0x00A0) count++;
+        }
+        return count;
+      }
+
+      function sanitizeFilename(name) {
+        return name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim();
+      }
+
+      function extractBookTitle(filename) {
+        let base = filename.replace(/\.txt$/i, '').trim();
+        base = base.replace(/^【[^】]+】\s*/, '');
+        const bookMark = base.match(/^《(.+)》$/);
+        if (bookMark) base = bookMark[1].trim();
+        return base || '未命名小说';
+      }
+
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // --- 编码识别与解码 ---
+      function decodeBuffer(buffer, mode) {
+        const bytes = new Uint8Array(buffer);
+        let used = mode;
+
+        if (mode === 'auto') {
+          if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+            used = 'utf-8';
+          } else if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
+            used = 'utf-16le';
+          } else if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
+            used = 'utf-16be';
+          } else {
+            try {
+              const strictText = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+              return { text: strictText, encoding: 'UTF-8（自动）' };
+            } catch (_) {
+              used = 'gb18030';
+            }
+          }
+        }
+
+        let decoded = '';
+        try {
+          decoded = new TextDecoder(used, { fatal: false }).decode(buffer);
+        } catch (_) {
+          decoded = new TextDecoder('utf-8', { fatal: false }).decode(buffer);
+          used = 'utf-8';
+        }
+
+        const labelMap = {
+          'utf-8': 'UTF-8',
+          'gb18030': 'GB18030 / GBK',
+          'big5': 'Big5',
+          'utf-16le': 'UTF-16 LE',
+          'utf-16be': 'UTF-16 BE'
+        };
+        const suffix = mode === 'auto' ? '（自动）' : '（手动）';
+        return { text: decoded, encoding: (labelMap[used] || used.toUpperCase()) + suffix };
+      }
+
+      // --- 老旧电子书排版清洗 ---
+      function applyTextCleanup(rawText) {
+        let text = rawText;
+        let htmlTagCount = 0;
+        let dividerCount = 0;
+        let weirdSpaceCount = 0;
+
+        if (state.cleanHtmlTags) {
+          // 行首/行尾已有换行的 <br> 直接移除，避免产生多余空行；行内 <br> 保留为换行
+          text = text.replace(/\n[ \t]*<br\s*\/?>/gi, () => { htmlTagCount++; return '\n'; });
+          text = text.replace(/<br\s*\/?>[ \t]*\n/gi, () => { htmlTagCount++; return '\n'; });
+          text = text.replace(/<br\s*\/?>/gi, () => { htmlTagCount++; return '\n'; });
+          // 清理 <p> / </p> / <div> / <span> 等残留网页标签
+          text = text.replace(/<\/?(?:p|div|span|font|center)(?:\s[^>]*)?\/?>/gi, () => {
+            htmlTagCount++;
+            return '';
+          });
+          // 还原常见 HTML 实体
+          text = text.replace(/&nbsp;/gi, () => { htmlTagCount++; return ' '; });
+          text = text.replace(/&quot;/gi, () => { htmlTagCount++; return '"'; });
+          text = text.replace(/&lt;/gi, () => { htmlTagCount++; return '<'; });
+          text = text.replace(/&gt;/gi, () => { htmlTagCount++; return '>'; });
+          text = text.replace(/&amp;/gi, () => { htmlTagCount++; return '&'; });
+        }
+
+        if (state.cleanNoise) {
+          // 清理老旧转码残留的私有区异常空白符（如  U+E4C6）与 NBSP
+          text = text.replace(/[\u00A0\uE000-\uF8FF]/g, () => {
+            weirdSpaceCount++;
+            return ' ';
+          });
+          // 清理纯装饰性长分隔线（如 ---------- / ==========）
+          text = text.replace(/^[ \t ]*[-=_~*─━═]{10,}[ \t ]*$/gm, () => {
+            dividerCount++;
+            return '';
+          });
+          // 将 3 个及以上连续换行压缩为标准双换行
+          text = text.replace(/\n{3,}/g, '\n\n');
+        }
+
+        state.cleanupStats = {
+          htmlTagCount,
+          dividerCount,
+          weirdSpaceCount,
+          total: htmlTagCount + dividerCount + weirdSpaceCount
+        };
+        return text;
+      }
+
+      function refreshCleanedTextAndSplit() {
+        if (!state.buffer) return;
+        state.text = applyTextCleanup(state.rawText);
+        state.totalChars = countCharsRange(state.text, 0, state.text.length, state.excludeWhitespace);
+
+        els.fileSummary.classList.remove('hidden');
+        els.encodingSection.classList.remove('hidden');
+        els.fileNameDisplay.textContent = state.rawFileName;
+        els.fileStatsDisplay.textContent = `${formatBytes(state.fileSize)} · 共 ${formatNumber(state.totalChars)} 字`;
+        els.detectedEncodingTag.textContent = state.detectedEncoding;
+        els.samplePaper.textContent = state.text.slice(0, 500) + (state.text.length > 500 ? '\n……' : '');
+
+        // 更新清洗报告胶囊
+        const st = state.cleanupStats;
+        if (st.total > 0) {
+          const items = [];
+          if (st.htmlTagCount > 0) items.push(`${formatNumber(st.htmlTagCount)} 处网页标签`);
+          if (st.weirdSpaceCount > 0) items.push(`${formatNumber(st.weirdSpaceCount)} 处异常空白`);
+          if (st.dividerCount > 0) items.push(`${formatNumber(st.dividerCount)} 条装饰横线`);
+          els.cleanupPillText.textContent = `已自动净化：${items.join(' · ')}`;
+          els.cleanupPill.classList.remove('hidden');
+        } else {
+          els.cleanupPill.classList.add('hidden');
+        }
+
+        recomputeSplit();
+      }
+
+      // --- 加载文件 ---
+      async function handleFile(file) {
+        if (!file) return;
+        const buffer = await file.arrayBuffer();
+        state.buffer = buffer;
+        state.rawFileName = file.name;
+        state.fileSize = file.size;
+        state.encodingMode = 'auto';
+        els.encodingSelect.value = 'auto';
+        state.paragraphFallback = false;
+        els.paragraphFallback.checked = false;
+
+        const inferredTitle = extractBookTitle(file.name);
+        state.bookTitle = inferredTitle;
+        els.bookTitle.value = inferredTitle;
+
+        processDecodeAndSplit();
+        showToast(`已载入「${file.name}」`);
+      }
+
+      function processDecodeAndSplit() {
+        if (!state.buffer) return;
+        const { text, encoding } = decodeBuffer(state.buffer, state.encodingMode);
+        state.rawText = text.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+        state.detectedEncoding = encoding;
+        refreshCleanedTextAndSplit();
+      }
+
+      // --- 章节解析（低内存逐行偏移扫描）---
+      function parseChapters() {
+        state.prologue = null;
+        state.chapters = [];
+        els.regexError.classList.add('hidden');
+
+        if (!state.text) return true;
+
+        let regex;
+        try {
+          regex = new RegExp(state.regexStr);
+        } catch (err) {
+          els.regexError.textContent = '正则表达式语法错误：' + err.message;
+          els.regexError.classList.remove('hidden');
+          return false;
+        }
+
+        const text = state.text;
+        const len = text.length;
+        const maxLen = Math.max(8, Number(state.maxTitleLength) || 45);
+        const rawMatches = [];
+
+        let pos = 0;
+        while (pos < len) {
+          let nl = text.indexOf('\n', pos);
+          if (nl === -1) nl = len;
+
+          if (nl - pos <= maxLen + 20) {
+            const trimmed = text.slice(pos, nl).trim();
+            if (trimmed.length > 0 && trimmed.length <= maxLen && regex.test(trimmed)) {
+              rawMatches.push({ title: trimmed, start: pos });
+            }
+          }
+          pos = nl + 1;
+        }
+
+        if (rawMatches.length === 0) return true;
+
+        if (rawMatches[0].start > 0) {
+          const preChars = countCharsRange(text, 0, rawMatches[0].start, state.excludeWhitespace);
+          if (preChars > 0) {
+            state.prologue = { start: 0, end: rawMatches[0].start, chars: preChars };
+          }
+        }
+
+        for (let i = 0; i < rawMatches.length; i++) {
+          const start = rawMatches[i].start;
+          const end = i + 1 < rawMatches.length ? rawMatches[i + 1].start : len;
+          state.chapters.push({
+            index: i + 1,
+            title: rawMatches[i].title,
+            start,
+            end,
+            chars: countCharsRange(text, start, end, state.excludeWhitespace)
+          });
+        }
+        return true;
+      }
+
+      // --- 生成合并分卷 ---
+      function buildChunks() {
+        state.chunks = [];
+        if (!state.text) return;
+
+        const useFallback = state.paragraphFallback || state.chapters.length === 0;
+        if (useFallback) {
+          if (!state.paragraphFallback && state.chapters.length === 0) return;
+          buildParagraphFallbackChunks();
+          return;
+        }
+
+        const chapters = state.chapters;
+        const grouped = [];
+        const step = Math.max(1, parseInt(state.chaptersPerFile, 10) || 50);
+        const limit = Math.max(1000, parseInt(state.maxCharsPerFile, 10) || 350000);
+
+        if (state.mode === 'chapters') {
+          for (let i = 0; i < chapters.length; i += step) {
+            grouped.push(chapters.slice(i, i + step));
+          }
+        } else {
+          let cur = [];
+          let curChars = (state.mergePrologue && state.prologue) ? state.prologue.chars : 0;
+
+          for (let i = 0; i < chapters.length; i++) {
+            const ch = chapters[i];
+            if (cur.length > 0 && curChars + ch.chars > limit) {
+              grouped.push(cur);
+              cur = [ch];
+              curChars = ch.chars;
+            } else {
+              cur.push(ch);
+              curChars += ch.chars;
+            }
+          }
+          if (cur.length > 0) grouped.push(cur);
+        }
+
+        // 尾卷过小时自动并入上一份（不超 NotebookLM 50 万字上限）
+        let mergedTail = false;
+        if (state.mergeSmallTail && grouped.length >= 2) {
+          const lastGroup = grouped[grouped.length - 1];
+          const prevGroup = grouped[grouped.length - 2];
+          const lastChars = lastGroup.reduce((s, c) => s + c.chars, 0);
+          let prevChars = prevGroup.reduce((s, c) => s + c.chars, 0);
+          if (grouped.length === 2 && state.mergePrologue && state.prologue) {
+            prevChars += state.prologue.chars;
+          }
+
+          const isSmallTail = state.mode === 'chapters'
+            ? lastGroup.length <= Math.max(4, Math.floor(step * 0.25))
+            : lastChars <= Math.max(15000, Math.floor(limit * 0.25));
+
+          const maxAllowedAfterMerge = state.mode === 'chapters'
+            ? NOTEBOOKLM_LIMIT
+            : Math.min(NOTEBOOKLM_LIMIT, Math.round(limit * 1.25));
+
+          if (isSmallTail && prevChars + lastChars <= maxAllowedAfterMerge) {
+            grouped[grouped.length - 2] = prevGroup.concat(lastGroup);
+            grouped.pop();
+            mergedTail = true;
+          }
+        }
+
+        const filePad = Math.max(2, String(grouped.length).length);
+        const chapPad = Math.max(3, String(chapters.length).length);
+        const safePrefix = sanitizeFilename(state.prefix);
+        const safeTitle = sanitizeFilename(state.bookTitle || '未命名小说');
+
+        grouped.forEach((group, idx) => {
+          const first = group[0];
+          const last = group[group.length - 1];
+          const includePrologue = idx === 0 && state.mergePrologue && state.prologue;
+          const startOffset = includePrologue ? 0 : first.start;
+          const endOffset = last.end;
+          let chars = group.reduce((sum, c) => sum + c.chars, 0);
+          if (includePrologue) chars += state.prologue.chars;
+
+          const fileNum = String(idx + 1).padStart(filePad, '0');
+          const startNum = String(first.index).padStart(chapPad, '0');
+          const endNum = String(last.index).padStart(chapPad, '0');
+          const rangeLabel = first.index === last.index
+            ? `第${startNum}章`
+            : `第${startNum}-${endNum}章`;
+
+          const filename = `${safePrefix}${safeTitle}_${fileNum}_${rangeLabel}.txt`;
+          const largeChapCount = group.filter(c => c.chars >= LARGE_CHAPTER_WARN).length;
+
+          state.chunks.push({
+            idx,
+            filename,
+            startOffset,
+            endOffset,
+            chars,
+            chapterCount: group.length,
+            startTitle: first.title,
+            endTitle: last.title,
+            rangeText: rangeLabel,
+            hasPrologue: Boolean(includePrologue),
+            hasMergedTail: mergedTail && idx === grouped.length - 1,
+            largeChapCount,
+            isParagraphMode: false,
+            chapters: group
+          });
+        });
+      }
+
+      // 段落边界兜底切分
+      function buildParagraphFallbackChunks() {
+        const text = state.text;
+        const len = text.length;
+        const limit = Math.max(5000, parseInt(state.maxCharsPerFile, 10) || 350000);
+        const rawParts = [];
+
+        let partStart = 0;
+        let curChars = 0;
+        let pos = 0;
+
+        while (pos < len) {
+          let nl = text.indexOf('\n', pos);
+          const lineEnd = nl === -1 ? len : nl + 1;
+          const lineChars = countCharsRange(text, pos, lineEnd, state.excludeWhitespace);
+
+          if (curChars > 0 && curChars + lineChars > limit) {
+            rawParts.push({ start: partStart, end: pos, chars: curChars });
+            partStart = pos;
+            curChars = lineChars;
+          } else {
+            curChars += lineChars;
+          }
+          pos = lineEnd;
+        }
+        if (partStart < len) {
+          rawParts.push({ start: partStart, end: len, chars: curChars });
+        }
+
+        let mergedTail = false;
+        if (state.mergeSmallTail && rawParts.length >= 2) {
+          const last = rawParts[rawParts.length - 1];
+          const prev = rawParts[rawParts.length - 2];
+          const maxAllowed = Math.min(NOTEBOOKLM_LIMIT, Math.round(limit * 1.25));
+          if (last.chars <= Math.max(15000, Math.floor(limit * 0.25)) && prev.chars + last.chars <= maxAllowed) {
+            prev.end = last.end;
+            prev.chars += last.chars;
+            rawParts.pop();
+            mergedTail = true;
+          }
+        }
+
+        const filePad = Math.max(2, String(rawParts.length).length);
+        const safePrefix = sanitizeFilename(state.prefix);
+        const safeTitle = sanitizeFilename(state.bookTitle || '未命名小说');
+
+        rawParts.forEach((p, idx) => {
+          const fileNum = String(idx + 1).padStart(filePad, '0');
+          const filename = `${safePrefix}${safeTitle}_${fileNum}_段落卷${fileNum}.txt`;
+          const headLine = text.slice(p.start, Math.min(p.end, p.start + 80)).split('\n').find(s => s.trim()) || '（段落起点）';
+          const tailSlice = text.slice(Math.max(p.start, p.end - 120), p.end).split('\n').reverse().find(s => s.trim()) || '（段落终点）';
+
+          state.chunks.push({
+            idx,
+            filename,
+            startOffset: p.start,
+            endOffset: p.end,
+            chars: p.chars,
+            chapterCount: 0,
+            startTitle: headLine.trim().slice(0, 38),
+            endTitle: tailSlice.trim().slice(0, 38),
+            rangeText: `段落切分 #${idx + 1}`,
+            hasPrologue: false,
+            hasMergedTail: mergedTail && idx === rawParts.length - 1,
+            largeChapCount: 0,
+            isParagraphMode: true,
+            chapters: []
+          });
+        });
+      }
+
+      // --- 统一重算与渲染 ---
+      function recomputeSplit() {
+        updateNamePreview();
+        if (!state.buffer) {
+          renderEmpty();
+          return;
+        }
+        const ok = parseChapters();
+        if (!ok) {
+          state.chunks = [];
+          renderResults();
+          return;
+        }
+        buildChunks();
+        renderResults();
+      }
+
+      function updateNamePreview() {
+        const safePrefix = sanitizeFilename(state.prefix);
+        const safeTitle = sanitizeFilename(state.bookTitle || '未命名小说');
+        if (state.chunks.length > 0) {
+          els.namePreview.textContent = state.chunks[0].filename;
+        } else if (state.paragraphFallback) {
+          els.namePreview.textContent = `${safePrefix}${safeTitle}_01_段落卷01.txt`;
+        } else {
+          const step = Math.max(1, parseInt(state.chaptersPerFile, 10) || 50);
+          const endStr = String(step).padStart(3, '0');
+          els.namePreview.textContent = `${safePrefix}${safeTitle}_01_第001-${endStr}章.txt`;
+        }
+      }
+
+      function renderEmpty() {
+        els.emptyState.classList.remove('hidden');
+        els.chunkList.classList.add('hidden');
+        els.noticeBanner.classList.add('hidden');
+        els.downloadZipBtn.disabled = true;
+        els.mobileZipBtn.disabled = true;
+        els.mobileStickyBar.classList.remove('visible');
+        els.kpiTotalChars.textContent = '—';
+        els.kpiFileSize.textContent = '等待载入文件';
+        els.kpiChapters.textContent = '—';
+        els.kpiAvgChars.textContent = '均章字数 —';
+        els.kpiChunks.textContent = '—';
+        els.kpiModeDesc.textContent = state.mode === 'chapters' ? '按章节数合并' : '按字数上限合并';
+        els.kpiSafety.textContent = '—';
+        els.kpiSafety.style.color = '';
+        els.kpiMaxChunk.textContent = '单份上限 50 万字';
+      }
+
+      function renderResults() {
+        els.emptyState.classList.add('hidden');
+
+        els.kpiTotalChars.textContent = formatWan(state.totalChars);
+        els.kpiFileSize.textContent = `${formatBytes(state.fileSize)} · ${state.excludeWhitespace ? '有效字数' : '含空白总字符'}`;
+
+        if (state.paragraphFallback) {
+          els.kpiChapters.textContent = '段落模式';
+          els.kpiAvgChars.textContent = '按换行边界切分';
+        } else {
+          els.kpiChapters.textContent = state.chapters.length > 0 ? `${formatNumber(state.chapters.length)} 章` : '0 章';
+          const avg = state.chapters.length > 0 ? Math.round(state.totalChars / state.chapters.length) : 0;
+          els.kpiAvgChars.textContent = avg > 0 ? `均章约 ${formatNumber(avg)} 字` : '未匹配到章节标题';
+        }
+
+        els.kpiChunks.textContent = `${state.chunks.length} 份`;
+        els.kpiModeDesc.textContent = state.paragraphFallback
+          ? `每份 ≤ ${formatWan(state.maxCharsPerFile)}`
+          : (state.mode === 'chapters'
+            ? `每 ${state.chaptersPerFile} 章合并`
+            : `每份 ≤ ${formatWan(state.maxCharsPerFile)}`);
+
+        const maxChunkChars = state.chunks.reduce((m, c) => Math.max(m, c.chars), 0);
+        const overCount = state.chunks.filter(c => c.chars > NOTEBOOKLM_LIMIT).length;
+        if (state.chunks.length === 0) {
+          els.kpiSafety.textContent = '待调整';
+          els.kpiSafety.style.color = 'var(--warn)';
+          els.kpiMaxChunk.textContent = '请调整正则或开启兜底';
+        } else if (overCount === 0) {
+          els.kpiSafety.textContent = '全部合规';
+          els.kpiSafety.style.color = 'var(--ok)';
+          els.kpiMaxChunk.textContent = `最大单份 ${formatWan(maxChunkChars)}`;
+        } else {
+          els.kpiSafety.textContent = `${overCount} 份超限`;
+          els.kpiSafety.style.color = 'var(--danger)';
+          els.kpiMaxChunk.textContent = `最大单份 ${formatWan(maxChunkChars)} (>50万)`;
+        }
+
+        // 横幅提示逻辑
+        els.noticeActions.innerHTML = '';
+        if (!state.paragraphFallback && state.chapters.length === 0) {
+          els.noticeBanner.className = 'notice-banner';
+          els.noticeText.innerHTML = '<strong>未识别到标准章节标题</strong>：可能是原文件使用了纯数字章号或属于无章节长文。你可以切换「宽松正则」，或直接使用「段落边界兜底切分」。';
+          const btnRelax = document.createElement('button');
+          btnRelax.className = 'btn-sm';
+          btnRelax.textContent = '尝试宽松正则';
+          btnRelax.onclick = () => applyRegexPreset('relaxed');
+
+          const btnPara = document.createElement('button');
+          btnPara.className = 'btn-primary btn-sm';
+          btnPara.textContent = '按段落边界兜底切分';
+          btnPara.onclick = () => {
+            state.paragraphFallback = true;
+            els.paragraphFallback.checked = true;
+            recomputeSplit();
+          };
+          els.noticeActions.append(btnRelax, btnPara);
+        } else if (overCount > 0) {
+          els.noticeBanner.className = 'notice-banner';
+          els.noticeText.innerHTML = `<strong>注意：</strong>有 <strong>${overCount}</strong> 份文件超过 NotebookLM 50 万字单文件上限（已用朱红标出）。建议切换为「按字数上限合并（35 万字）」或调小每份章节数。`;
+          if (state.mode === 'chapters') {
+            const btnSwitch = document.createElement('button');
+            btnSwitch.className = 'btn-primary btn-sm';
+            btnSwitch.textContent = '切换至 35 万字上限模式';
+            btnSwitch.onclick = () => setSplitMode('chars');
+            els.noticeActions.append(btnSwitch);
+          }
+        } else if (state.prologue && !state.mergePrologue && !state.paragraphFallback) {
+          els.noticeBanner.className = 'notice-banner';
+          els.noticeText.innerHTML = `检测到第一章前有约 <strong>${formatNumber(state.prologue.chars)}</strong> 字的卷首序言/简介，当前未勾选并入第 1 份，导出时将不包含该段。`;
+        } else {
+          els.noticeBanner.classList.add('hidden');
+        }
+
+        updateNamePreview();
+
+        const hasChunks = state.chunks.length > 0;
+        els.downloadZipBtn.disabled = !hasChunks;
+        els.mobileZipBtn.disabled = !hasChunks;
+        els.mobileStickyBar.classList.toggle('visible', hasChunks);
+        els.mobileChunkCount.textContent = state.chunks.length;
+        els.mobileMaxWarn.textContent = overCount > 0
+          ? `⚠ ${overCount} 份超出 50 万字上限`
+          : `最大 ${formatWan(maxChunkChars)} · 适配 NotebookLM`;
+
+        if (!hasChunks) {
+          els.chunkList.classList.add('hidden');
+          els.chunkList.innerHTML = '';
+          return;
+        }
+
+        els.chunkList.classList.remove('hidden');
+        const frag = document.createDocumentFragment();
+
+        state.chunks.forEach((chunk) => {
+          const pctRaw = (chunk.chars / NOTEBOOKLM_LIMIT) * 100;
+          const pctClamped = Math.min(100, pctRaw);
+          const level = pctRaw > 100 ? 'danger' : (pctRaw > 82 ? 'warn' : 'ok');
+
+          const card = document.createElement('article');
+          card.className = 'chunk-card' + (level === 'danger' ? ' is-over' : '');
+
+          const badges = [];
+          if (chunk.hasPrologue) badges.push(`<span class="chunk-idx-badge badge-accent">含卷首序言</span>`);
+          if (chunk.hasMergedTail) badges.push(`<span class="chunk-idx-badge badge-ok">已自动合并小尾卷</span>`);
+          if (chunk.largeChapCount > 0) {
+            badges.push(`<span class="chunk-idx-badge badge-warn" title="此分卷内有单章超过 3 万字，可点抽检核查是否有特殊章号未切开">${chunk.largeChapCount} 章偏长</span>`);
+          }
+
+          card.innerHTML = `
+            <div class="chunk-top">
+              <div class="chunk-title-wrap">
+                <div class="chunk-filename">
+                  <span class="chunk-idx-badge">#${String(chunk.idx + 1).padStart(2, '0')}</span>
+                  <span>${escapeHtml(chunk.filename)}</span>
+                  ${badges.join('')}
+                </div>
+                <div class="chunk-range">
+                  <div class="chunk-range-line"><span class="chunk-range-tag">起点</span>${escapeHtml(chunk.startTitle)}</div>
+                  <div class="chunk-range-line"><span class="chunk-range-tag">终点</span>${escapeHtml(chunk.endTitle)}</div>
+                </div>
+              </div>
+              <div class="chunk-actions">
+                <button type="button" class="btn-sm" data-action="inspect" data-idx="${chunk.idx}">抽检</button>
+                <button type="button" class="btn-sm" data-action="download" data-idx="${chunk.idx}">下载</button>
+              </div>
+            </div>
+            <div class="chunk-meter">
+              <div class="meter-info">
+                <span>${chunk.isParagraphMode ? '段落边界切分' : `共 <strong>${chunk.chapterCount}</strong> 章`}</span>
+                <span><strong>${formatNumber(chunk.chars)}</strong> 字</span>
+                <span>约 ${formatBytes(chunk.chars * 3)}</span>
+              </div>
+              <div class="meter-bar-wrap" title="占 NotebookLM 50 万字上限比例">
+                <div class="meter-track">
+                  <div class="meter-fill ${level}" style="width: ${pctClamped.toFixed(1)}%"></div>
+                </div>
+                <span class="meter-pct ${level}">${pctRaw.toFixed(0)}%</span>
+              </div>
+            </div>
+          `;
+          frag.appendChild(card);
+        });
+
+        els.chunkList.innerHTML = '';
+        els.chunkList.appendChild(frag);
+      }
+
+      // --- 获取分卷纯文本 ---
+      function getChunkContent(chunk) {
+        return state.text.slice(chunk.startOffset, chunk.endOffset).trim() + '\n';
+      }
+
+      function triggerBlobDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      }
+
+      function downloadSingleChunk(idx) {
+        const chunk = state.chunks[idx];
+        if (!chunk) return;
+        const blob = new Blob([getChunkContent(chunk)], { type: 'text/plain;charset=utf-8' });
+        triggerBlobDownload(blob, chunk.filename);
+        showToast(`已导出：${chunk.filename}`);
+      }
+
+      // --- 一键打包 ZIP ---
+      async function downloadAllAsZip() {
+        if (state.chunks.length === 0) return;
+        if (typeof JSZip === 'undefined') {
+          showToast('JSZip 尚未加载（可能处于离线状态），请检查网络或单文件下载');
+          return;
+        }
+
+        els.downloadZipBtn.disabled = true;
+        els.mobileZipBtn.disabled = true;
+        els.zipProgressWrap.classList.remove('hidden');
+        els.zipProgressLabel.textContent = `正在写入 ${state.chunks.length} 份文件…`;
+        els.zipProgressPct.textContent = '0%';
+        els.zipProgressBar.style.width = '0%';
+
+        try {
+          const zip = new JSZip();
+          for (const chunk of state.chunks) {
+            zip.file(chunk.filename, getChunkContent(chunk));
+          }
+
+          els.zipProgressLabel.textContent = '正在压缩打包 ZIP…';
+          const blob = await zip.generateAsync(
+            { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+            (meta) => {
+              const p = Math.round(meta.percent);
+              els.zipProgressPct.textContent = p + '%';
+              els.zipProgressBar.style.width = p + '%';
+            }
+          );
+
+          const safePrefix = sanitizeFilename(state.prefix);
+          const safeTitle = sanitizeFilename(state.bookTitle || '未命名小说');
+          const zipName = `${safePrefix}${safeTitle}_共${state.chunks.length}份.zip`;
+          triggerBlobDownload(blob, zipName);
+          showToast(`打包完成：${zipName}`);
+        } catch (err) {
+          showToast('打包失败：' + err.message);
+        } finally {
+          els.downloadZipBtn.disabled = false;
+          els.mobileZipBtn.disabled = false;
+          setTimeout(() => els.zipProgressWrap.classList.add('hidden'), 1200);
+        }
+      }
+
+      // --- 抽检弹窗 ---
+      function openInspectModal(idx) {
+        const chunk = state.chunks[idx];
+        if (!chunk) return;
+        state.activeModalChunkIdx = idx;
+
+        els.modalTitle.textContent = chunk.filename;
+        if (chunk.isParagraphMode) {
+          els.modalTocMeta.textContent = `${formatNumber(chunk.chars)} 字`;
+          els.modalToc.innerHTML = `<div class="toc-row"><span>当前为段落边界兜底切分模式，无章节目录。</span></div>`;
+        } else {
+          els.modalTocMeta.textContent = `${chunk.chapterCount} 章 · ${formatNumber(chunk.chars)} 字`;
+          const rows = [];
+          if (chunk.hasPrologue) {
+            rows.push(`<div class="toc-row"><span class="toc-row-title"><strong>【卷首序言 / 简介】</strong></span><span class="toc-row-meta">${formatNumber(state.prologue.chars)} 字</span></div>`);
+          }
+          chunk.chapters.forEach((c) => {
+            const warnTag = c.chars >= LARGE_CHAPTER_WARN
+              ? `<span class="chunk-idx-badge badge-warn">偏长·可核查</span>`
+              : '';
+            rows.push(`
+              <div class="toc-row">
+                <span class="toc-row-title">${String(c.index).padStart(3, '0')}. ${escapeHtml(c.title)}</span>
+                <span class="toc-row-meta">${warnTag}<span>${formatNumber(c.chars)} 字</span></span>
+              </div>
+            `);
+          });
+          els.modalToc.innerHTML = rows.join('');
+        }
+
+        const content = getChunkContent(chunk);
+        els.modalHeadExcerpt.textContent = content.slice(0, 600) + (content.length > 600 ? '\n……' : '');
+        els.modalTailExcerpt.textContent = (content.length > 400 ? '……\n' : '') + content.slice(-400);
+
+        els.previewModal.classList.add('open');
+      }
+
+      function closeInspectModal() {
+        els.previewModal.classList.remove('open');
+        state.activeModalChunkIdx = -1;
+      }
+
+      // --- 模式与预设切换 ---
+      function setSplitMode(mode) {
+        state.mode = mode;
+        const isChap = mode === 'chapters';
+        els.modeChaptersBtn.classList.toggle('active', isChap);
+        els.modeCharsBtn.classList.toggle('active', !isChap);
+        els.modeChaptersBtn.setAttribute('aria-selected', String(isChap));
+        els.modeCharsBtn.setAttribute('aria-selected', String(!isChap));
+        els.chaptersParamGroup.classList.toggle('hidden', !isChap);
+        els.charsParamGroup.classList.toggle('hidden', isChap);
+        recomputeSplit();
+      }
+
+      function applyRegexPreset(key) {
+        const pattern = REGEX_PRESETS[key];
+        if (!pattern) return;
+        state.regexStr = pattern;
+        els.regexInput.value = pattern;
+        state.paragraphFallback = false;
+        els.paragraphFallback.checked = false;
+        els.regexPresets.querySelectorAll('.chip').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.regex === key);
+        });
+        recomputeSplit();
+      }
+
+      // --- 内置示例小说生成器（涵盖旧版网文各类真实疑难排版） ---
+      function loadSampleNovel() {
+        const parts = [];
+        parts.push('《青崖问道录》\n作者：墨卷示例\n\n简介：\n此示例模拟早期中文电子书的真实排版：含序章、104 个章节（含“第 七 章”字间空格、“三十九章”省第字与异常空白符）、<p>/<br> 网页残留标签与长横线，并用于验证小尾卷自动合并。\n\n');
+
+        const titles = [
+          '风起青萍末', '山雨欲来时', '石阶听松涛', '旧剑藏锋芒', '残碑问古意',
+          '夜宿白鹿驿', '孤舟渡寒江', '灯火照长街', '茶肆闻秘辛', '云深不知处'
+        ];
+        const paraA = '暮色四合，山间雾气顺着石阶缓缓漫上来。林渊收好行囊，指尖摩挲着那枚温润的旧玉佩。旁边桌上的书生压低声音说道：“你可别忘了第三章里抄录的那句口诀，若是念错一字，阵眼便会反噬。”林渊微微颔首，将茶盏里的残茶一饮而尽，推门步入微雨之中。\n';
+        const paraB = '<p>长街尽头挂着两盏昏黄的油纸灯笼，雨滴敲打在青瓦上，发出细密而有节奏的声响。远处的钟楼传来三声悠长的鸣响，惊起檐下栖息的寒鸦。他沿着石板路向北行去，衣袂沾染了夜露，心境却比白日里更加澄明。\n';
+
+        parts.push('序章\n\n天地茫茫，山海无垠，少年提灯自青崖下山。\n\n');
+
+        for (let i = 1; i <= 103; i++) {
+          const t = titles[(i - 1) % titles.length];
+          if (i === 7) {
+            parts.push(`第 七 章 ${t}\n--------------------------------------------------------------------------------\n\n`);
+          } else if (i === 39 || i === 40) {
+            parts.push(`${i === 39 ? '三十九' : '四十'}章\uE4C6${t}\n\n`);
+          } else {
+            parts.push(`第${i}章 ${t}\n\n`);
+          }
+
+          for (let p = 0; p < 5; p++) {
+            parts.push(p % 2 === 0 ? paraA : paraB);
+          }
+          if (i === 43) {
+            parts.push('  铃铛咽，百花凋，\n<br>  人影渐瘦鬓如霜。\n\n');
+          }
+          parts.push('\n');
+        }
+        parts.push('尾声\n\n山风拂过竹林，清脆铃声消散在暮色之中。\n\n（全书完）\n');
+
+        const sampleText = parts.join('');
+        const encoded = new TextEncoder().encode(sampleText);
+        state.buffer = encoded.buffer;
+        state.rawFileName = '青崖问道录（v2测试示例）.txt';
+        state.fileSize = encoded.byteLength;
+        state.encodingMode = 'auto';
+        els.encodingSelect.value = 'auto';
+        state.paragraphFallback = false;
+        els.paragraphFallback.checked = false;
+        state.bookTitle = '青崖问道录';
+        els.bookTitle.value = '青崖问道录';
+
+        processDecodeAndSplit();
+        showToast('已载入 105 章测试示例（含异构标题与标签残留）');
+      }
+
+      // --- 事件绑定 ---
+      els.regexInput.value = state.regexStr;
+
+      els.dropzone.addEventListener('click', () => els.fileInput.click());
+      els.dropzone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          els.fileInput.click();
+        }
+      });
+      els.reselectBtn.addEventListener('click', () => els.fileInput.click());
+
+      els.fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) handleFile(file);
+        e.target.value = '';
+      });
+
+      ['dragenter', 'dragover'].forEach((ev) => {
+        els.dropzone.addEventListener(ev, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          els.dropzone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach((ev) => {
+        els.dropzone.addEventListener(ev, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          els.dropzone.classList.remove('dragover');
+        });
+      });
+
+      els.dropzone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) handleFile(file);
+      });
+
+      els.loadSampleBtn.addEventListener('click', loadSampleNovel);
+      els.emptySampleBtn.addEventListener('click', loadSampleNovel);
+
+      els.encodingSelect.addEventListener('change', () => {
+        state.encodingMode = els.encodingSelect.value;
+        processDecodeAndSplit();
+      });
+
+      els.modeChaptersBtn.addEventListener('click', () => setSplitMode('chapters'));
+      els.modeCharsBtn.addEventListener('click', () => setSplitMode('chars'));
+
+      let debounceTimer = null;
+      function scheduleRecompute() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(recomputeSplit, 140);
+      }
+
+      els.chaptersPerFile.addEventListener('input', () => {
+        state.chaptersPerFile = Math.max(1, parseInt(els.chaptersPerFile.value, 10) || 1);
+        document.querySelectorAll('[data-chap-preset]').forEach((b) => {
+          b.classList.toggle('active', Number(b.dataset.chapPreset) === state.chaptersPerFile);
+        });
+        scheduleRecompute();
+      });
+
+      document.querySelectorAll('[data-chap-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const val = Number(btn.dataset.chapPreset);
+          state.chaptersPerFile = val;
+          els.chaptersPerFile.value = val;
+          document.querySelectorAll('[data-chap-preset]').forEach((b) => b.classList.toggle('active', b === btn));
+          recomputeSplit();
+        });
+      });
+
+      els.maxCharsPerFile.addEventListener('input', () => {
+        state.maxCharsPerFile = Math.max(1000, parseInt(els.maxCharsPerFile.value, 10) || 350000);
+        document.querySelectorAll('[data-char-preset]').forEach((b) => {
+          b.classList.toggle('active', Number(b.dataset.charPreset) === state.maxCharsPerFile);
+        });
+        scheduleRecompute();
+      });
+
+      document.querySelectorAll('[data-char-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const val = Number(btn.dataset.charPreset);
+          state.maxCharsPerFile = val;
+          els.maxCharsPerFile.value = val;
+          document.querySelectorAll('[data-char-preset]').forEach((b) => b.classList.toggle('active', b === btn));
+          recomputeSplit();
+        });
+      });
+
+      els.mergeSmallTail.addEventListener('change', () => {
+        state.mergeSmallTail = els.mergeSmallTail.checked;
+        recomputeSplit();
+      });
+
+      els.cleanHtmlTags.addEventListener('change', () => {
+        state.cleanHtmlTags = els.cleanHtmlTags.checked;
+        refreshCleanedTextAndSplit();
+      });
+
+      els.cleanNoise.addEventListener('change', () => {
+        state.cleanNoise = els.cleanNoise.checked;
+        refreshCleanedTextAndSplit();
+      });
+
+      els.filePrefix.addEventListener('input', () => {
+        state.prefix = els.filePrefix.value;
+        scheduleRecompute();
+      });
+
+      els.bookTitle.addEventListener('input', () => {
+        state.bookTitle = els.bookTitle.value;
+        scheduleRecompute();
+      });
+
+      els.regexPresets.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-regex]');
+        if (btn) applyRegexPreset(btn.dataset.regex);
+      });
+
+      els.regexInput.addEventListener('input', () => {
+        state.regexStr = els.regexInput.value;
+        els.regexPresets.querySelectorAll('.chip').forEach((b) => b.classList.remove('active'));
+        scheduleRecompute();
+      });
+
+      els.maxTitleLength.addEventListener('input', () => {
+        state.maxTitleLength = Math.max(8, parseInt(els.maxTitleLength.value, 10) || 45);
+        scheduleRecompute();
+      });
+
+      els.mergePrologue.addEventListener('change', () => {
+        state.mergePrologue = els.mergePrologue.checked;
+        recomputeSplit();
+      });
+
+      els.excludeWhitespace.addEventListener('change', () => {
+        state.excludeWhitespace = els.excludeWhitespace.checked;
+        if (state.buffer) {
+          state.totalChars = countCharsRange(state.text, 0, state.text.length, state.excludeWhitespace);
+          els.fileStatsDisplay.textContent = `${formatBytes(state.fileSize)} · 共 ${formatNumber(state.totalChars)} 字`;
+          recomputeSplit();
+        }
+      });
+
+      els.paragraphFallback.addEventListener('change', () => {
+        state.paragraphFallback = els.paragraphFallback.checked;
+        recomputeSplit();
+      });
+
+      els.chunkList.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const idx = Number(btn.dataset.idx);
+        if (btn.dataset.action === 'inspect') openInspectModal(idx);
+        if (btn.dataset.action === 'download') downloadSingleChunk(idx);
+      });
+
+      els.downloadZipBtn.addEventListener('click', downloadAllAsZip);
+      els.mobileZipBtn.addEventListener('click', downloadAllAsZip);
+
+      els.closeModalBtn.addEventListener('click', closeInspectModal);
+      els.modalCloseFooterBtn.addEventListener('click', closeInspectModal);
+      els.modalDownloadBtn.addEventListener('click', () => {
+        if (state.activeModalChunkIdx >= 0) downloadSingleChunk(state.activeModalChunkIdx);
+      });
+      els.previewModal.addEventListener('click', (e) => {
+        if (e.target === els.previewModal) closeInspectModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && els.previewModal.classList.contains('open')) closeInspectModal();
+      });
+
+      initTheme();
+      updateNamePreview();
+    })();
+  </script>
+</body>
+</html>
